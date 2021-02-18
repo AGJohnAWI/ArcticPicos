@@ -1,0 +1,55 @@
+---
+title: "Arctic picos"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r packages}
+library(iNEXT)
+library(tidyverse)
+library(tidyr) 
+library(dplyr)
+library(ggplot2)
+library(vegan)
+library(tibble) #for "rownames_to_column('Site')" 
+library(geodist)
+library(reshape2)
+library(UpSetR)
+library(ComplexHeatmap)
+```
+
+```{r import_data, echo=TRUE, warning=FALSE}
+source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/import.R", encoding = "UTF-8")
+```
+
+```{r alpha_div, echo=TRUE, fig.width=7,fig.height=3.5, fig.show="hold", out.width="50%"}
+source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/alpha_diversity.R")
+
+#the following is very intense comuting so better to not run it too often
+#diversity_rarecurve(eukaryotes)
+#diversity_rarecurve(prokaryotes)
+
+#load("~/Studenten/arctic_picos/Submission/20210217_rarecurves_calculate.RData")
+```
+```{r}
+source("C:/Users/choerstm/Documents/core_PS113/Genomics/RScripts/general_clr_hellinger_transformation.R")
+
+euk_hellinger <- hellinger(eukaryotes, 1)
+prok_hellinger <- hellinger(prokaryotes, 3)
+
+```
+
+```{r nmds}
+source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/NMDS.R")
+
+nmds_plot(prok_hellinger, meta_16S)
+nmds_plot(euk_hellinger, meta_18S)
+
+```
+
+
+
+
