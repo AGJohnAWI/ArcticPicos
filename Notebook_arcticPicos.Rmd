@@ -34,7 +34,7 @@ source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/alpha_dive
 
 #load("~/Studenten/arctic_picos/Submission/20210217_rarecurves_calculate.RData")
 ```
-```{r}
+```{r transformations}
 source("C:/Users/choerstm/Documents/core_PS113/Genomics/RScripts/general_clr_hellinger_transformation.R")
 
 euk_hellinger <- hellinger(eukaryotes, 1)
@@ -42,13 +42,36 @@ prok_hellinger <- hellinger(prokaryotes, 3)
 
 ```
 
-```{r nmds}
+```{r nmds, fig.width=5,fig.height=5, fig.show="hold", out.width="50%"}
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/NMDS.R")
 
 nmds_plot(prok_hellinger, meta_16S)
 nmds_plot(euk_hellinger, meta_18S)
 
+###remove outliers for better visualization
+
+outliers <- c("HE533.Euk.F02.04C_S9", "HE533.Euk.F02.08B_S20", "HE533.Euk.F02.08C_S21", "HE533.Euk.F02.09A_S22",
+              "HE533.Euk.F02.10A_S25", "HE533.Euk.F02.10C_S27", "HE533.Euk.F02.11A_S28", "HE533.Euk.F02.11C_S30",
+              "HE533.Euk.F02.12B_S32", "HE533.Euk.F02.12C_S33", "HE533.Euk.F02.19C_S54", "HE533.Euk.F02.22C_S63")
+euk_hellinger_df <- as.data.frame(euk_hellinger)
+euk_hellinger_r <- euk_hellinger_df%>%select(!outliers)
+meta_18S_r <- meta_18S%>%dplyr::filter(!Site %in% outliers)
+
+nmds_plot(euk_hellinger_r, meta_18S_r)
+
 ```
+*subsample those fjords where comparison between tip mouth / glacier influence is doable*
+
+```{r}
+#eukaryotes
+Fjords <- c("Nordvestfjord.Scoresby.Sund","	Van.Mijen.Fjrod", "Woodfjord", "Wijdefjord", "Tanafjord", "Porsangerfjord", "	Nordfjord", "	Sognefjord")
+
+a <- subset(meta_18S, meta_18S["In.Out"] == 1 | meta_18S["In.Out"] == 0)
+meta_tip_mouth_18S <- a%>%dplyr::filter(Fjord %in% Fjords)
+rownames(meta_tip_mouth_18S) <- meta_tip_mouth_18S$Site
+
+```
+
 
 
 
