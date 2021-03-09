@@ -15,6 +15,8 @@ nmds_result_1 <- dplyr::right_join(nmds_result, meta, by = "Site")
 nmds_result_1$Region2 <- as.character(nmds_result_1$Region2)
 nmds_result_1$Fjord <- as.character(nmds_result_1$Fjord2)
 
+stress <- print(paste0("stress = ", round(nmds_r$stress, digits = 3)))
+
 #plotting
 a <- nmds_result_1%>%ggplot(aes(x=NMDS1, y=NMDS2)) +
   scale_color_manual(values = c("#19116D", "#34E5EA", "#1FDD86", "#2E9968", "#028918", "#CEBF09", "#F4AF14", "#0808B7"))+
@@ -24,9 +26,11 @@ a <- nmds_result_1%>%ggplot(aes(x=NMDS1, y=NMDS2)) +
   theme(axis.text.x = element_blank(), axis.text.y = element_blank(), axis.ticks = element_blank(),
         panel.background = element_blank(), panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(), plot.background = element_blank())+
+  annotate("text",  -Inf, Inf, label = stress, hjust = 0, vjust = 1)+
   theme_bw() 
   #geom_label(data=nmds_16S_result_1, aes(x=NMDS1, y=NMDS2, label=Site), size=2)
 
 print(a)
+
 
 }
