@@ -4,6 +4,7 @@ network_netCoMi <- function(ASVTable, taxonomy, meta){
 
 suppressPackageStartupMessages(require(phyloseq))
 packageVersion("phyloseq")
+require("NetCoMi")
 
 #netCoMi seems to only allow 6 characters for names so we have to cut out the ">ASV_"
 
@@ -50,7 +51,7 @@ props_single_own <- netAnalyze(net_single_own,
                            weightDeg = FALSE, normDeg = FALSE)
 
 #?summary.microNetProps
-summary(props_single_own, numbNodes = 5L)
+print(summary(props_single_own, numbNodes = 5L))
 
 pi <- plot(props_single_own, 
           nodeColor = "cluster", 
@@ -72,74 +73,6 @@ require(metagMisc)
 own_split <- metagMisc::phyloseq_sep_variable(all, 
                                               "Glacial.influence") 
 
-
-# Network construction
-net_glacial <- netConstruct(data = own_split$No, 
-                            data2 = own_split$Yes,  
-                            filtTax = "highestVar",
-                            filtTaxPar = list(highestVar = 100),
-                            measure = "spring",
-                            measurePar = list(nlambda=10, 
-                                              rep.num=10),
-                            normMethod = "none", 
-                            zeroMethod = "none",
-                            sparsMethod = "none", 
-                            dissFunc = "signed",
-                            verbose = 3,
-                            seed = 123456)
-
-
-props_glacier <- netAnalyze(net_glacial, 
-                           centrLCC = FALSE,
-                           avDissIgnoreInf = TRUE,
-                           sPathNorm = FALSE,
-                           clustMethod = "cluster_fast_greedy",
-                           hubPar = c("degree", "between", "closeness"),
-                           hubQuant = 0.9,
-                           lnormFit = TRUE,
-                           normDeg = FALSE,
-                           normBetw = FALSE,
-                           normClose = FALSE,
-                           normEigen = FALSE)
-
-summary(props_glacier)
-
-
-###visualize
-
-
-plot(props_glacier, 
-     sameLayout = FALSE, 
-     nodeColor = "cluster",
-     nodeSize = "mclr",
-     labelScale = FALSE,
-     cexNodes = 0.5, 
-     cexLabels = 0.5,
-     cexHubLabels = 0.7,
-     cexTitle = 1.2,
-     groupNames = c("No glacial influence", "Glacial influence"),
-     hubBorderCol  = "gray40")
-
-legend("bottom", title = "estimated association:", legend = c("+","-"), 
-       col = c("#009900","red"), inset = 0.02, cex = 1, lty = 1, lwd = 1, 
-       bty = "n", horiz = TRUE)
-
-
-plot(props_glacier, 
-     sameLayout = TRUE, 
-     layoutGroup = "union",
-     rmSingles = "inboth", 
-     nodeSize = "mclr", 
-     labelScale = FALSE,
-     cexNodes = 0.7, 
-     cexLabels = 0.7,
-     cexHubLabels = 0.7,
-     cexTitle = 0.8,
-     groupNames = c("No glacier", "glacier"),
-     hubBorderCol  = "gray40")
-
-
-
 #######################################################
 ########with taxonomy
 
@@ -148,37 +81,37 @@ plot(props_glacier,
 rank_names(all)
 
 # Agglomerate to order level
-amgut_genus <- phyloseq::tax_glom(own_split$No, taxrank = "order")
+amgut_genus <- all
 taxtab <- amgut_genus@tax_table@.Data
 
 # Find undefined taxa (in this data set, unknowns occur only up to Rank5)
-miss_f <- which(taxtab[, "order"] == "f__")
+miss_f <- which(taxtab[, "genus"] == "f__")
 miss_g <- which(taxtab[, "class"] == "g__")
 
 # Number unspecified genera
-taxtab[miss_f, "order"] <- paste0("f__", 1:length(miss_f))
+taxtab[miss_f, "genus"] <- paste0("f__", 1:length(miss_f))
 taxtab[miss_g, "class"] <- paste0("g__", 1:length(miss_g))
 
 # Find duplicate genera
-dupl_g <- which(duplicated(taxtab[, "order"]) |
-                        duplicated(taxtab[, "order"], fromLast = TRUE))
+dupl_g <- which(duplicated(taxtab[, "genus"]) |
+                        duplicated(taxtab[, "genus"], fromLast = TRUE))
 
 for(i in seq_along(taxtab)){
         # The next higher non-missing rank is assigned to unspecified genera
         if(i %in% miss_f && i %in% miss_g){
-                taxtab[i, "order"] <- paste0(taxtab[i, "order"], "(", taxtab[i, "phylum"], ")")
+                taxtab[i, "genus"] <- paste0(taxtab[i, "genus"], "(", taxtab[i, "phylum"], ")")
         } else if(i %in% miss_g){
-                taxtab[i, "order"] <- paste0(taxtab[i, "order"], "(", taxtab[i, "class"], ")")
+                taxtab[i, "genus"] <- paste0(taxtab[i, "genus"], "(", taxtab[i, "class"], ")")
         }
         
         # Family names are added to duplicate genera
         if(i %in% dupl_g){
-                taxtab[i, "order"] <- paste0(taxtab[i, "order"], "(", taxtab[i, "order"], ")")
+                taxtab[i, "genus"] <- paste0(taxtab[i, "genus"], "(", taxtab[i, "genus"], ")")
         }
 }
 
 amgut_genus@tax_table@.Data <- taxtab
-rownames(amgut_genus@otu_table@.Data) <- taxtab[, "order"]
+rownames(amgut_genus@otu_table@.Data) <- taxtab[, "genus"]
 
 # Network construction and analysis
 net_single3 <- netConstruct(amgut_genus, 
