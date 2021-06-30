@@ -26,52 +26,152 @@ source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/import.R",
 
 ```
 
-```{r alpha_div, echo=TRUE, fig.width=7,fig.height=3.5, fig.show="hold", out.width="50%"}
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/alpha_diversity.R")
-
-#the following is very intense comuting so better to not run it too often
-#diversity_rarecurve(eukaryotes)
-#diversity_rarecurve(prokaryotes)
-
-#load("~/Studenten/arctic_picos/Submission/20210217_rarecurves_calculate.RData")
-```
-
 #remove outliers
 ```{r}
 outliers <- c("HE533.Euk.F02.04C_S9", "HE533.Euk.F02.08B_S20", "HE533.Euk.F02.08C_S21", "HE533.Euk.F02.09A_S22",
               "HE533.Euk.F02.10A_S25", "HE533.Euk.F02.10C_S27", "HE533.Euk.F02.11A_S28", "HE533.Euk.F02.11C_S30",
               "HE533.Euk.F02.12B_S32", "HE533.Euk.F02.12C_S33", "HE533.Euk.F02.19C_S54", "HE533.Euk.F02.22C_S63")
 
+outliers_prok <- c("HE533.Prok.F02.4C_S11", "HE533.Prok.F02.8B_S26" ,"HE533.Prok.F02.8C_S27", "HE533.Prok.F02.9A_S29",
+                   "HE533.Prok.F02.10A_S33", "HE533.Prok.F02.11A_S37", "HE533.Prok.F02.11C_S39",
+                   "HE533.Prok.F02.12B_S42", "HE533.Prok.F02.12C_S43", "HE533.Prok.F02.19C_S71",
+                   "HE533.Prok.F02.22C_S83")
+
 ###remove outliers for better visualization
 
 euk_r <- eukaryotes%>%dplyr::select(!outliers)
 euk_r <- euk_r[rowSums(euk_r)>0,]
 
+prok_r <- prokaryotes%>%dplyr::select(!outliers_prok)
+prok_r <- prok_r[rowSums(prok_r)>0,]
 
-meta_18S_r <- meta_18S%>%dplyr::filter(Site %in% colnames(euk_r))
+
+meta_16S_r <- meta_16S%>%dplyr::filter(Site %in% colnames(prok_r))
+```
+
+```{r alpha_div, echo=TRUE, fig.width=7,fig.height=3.5, fig.show="hold", out.width="50%"}
+source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/alpha_diversity.R")
+
+#the following is very intense comuting so better to not run it too often
+euk_r_alpha <- diversity_iNEXT(euk_r)
+prok_alpha <- diversity_iNEXT(prokaryotes)
+
+
+euk_r_alpha_meta <- left_join(euk_r_alpha, meta_18S_r, by = "Site")
+prok_alpha_meta <- left_join(prok_alpha, meta_16S, by = "Site")
+
+euk_r_alpha_meta_l <- euk_r_alpha_meta%>%gather(Div_indices, Div_value, Richness, Shannon, Simpson)
+prok_alpha_meta_l <- prok_alpha_meta%>%gather(Div_indices, Div_value, Richness, Shannon, Simpson)
+```
+#to not repeat the diversity calculations too often:
+load("~/Studenten/arctic_picos/Submission/20210625_div_calc.RData")
+
+alpha diversity boxplots
+```{r div_boxplots}
+source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/boxplot_alphadiv.R")
 ```
 
 ## data transformations
 ```{r transformations}
-source("C:/Users/choerstm/Documents/core_PS113/Genomics/RScripts/general_clr_hellinger_transformation.R")
+source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/transformation_CLR_aitchinson.R")
 
-euk_hellinger <- hellinger(euk_r, 1)
-prok_hellinger <- hellinger(prokaryotes, 5)
+euk_aitchinson <- dczm(euk_r, 1)
+prok_aitchinson <- dczm(prokaryotes, 5)
+#prok_aitchinson_r <- dczm(prok_r, 5)
 
-euk_hellinger_df <- as.data.frame(euk_hellinger)
 
 euk_clr <- clr(euk_r,1)
 prok_clr <- clr(prokaryotes, 5)
 ```
 
+# metadata removing NAs and z-scoring 
+```{r}
+##prokaryotes
+
+#replace below detection with actual number
+meta_16S$PO4..µmol.l. <- gsub("<LOQ","0.001", meta_16S$PO4..µmol.l.)
+meta_16S$Si..µmol.l. <- gsub("<LOQ","0.001", meta_16S$Si..µmol.l.)
+
+meta_16S$PO4..µmol.l. <- as.numeric(meta_16S$PO4..µmol.l.)
+meta_16S$Si..µmol.l. <- as.numeric(meta_16S$Si..µmol.l.)
+
+
+#remove NAs and reduce to relevant metadata
+
+metadata_16S <- c("Site", "Region", "Fjord", "Latitude", "Longitude", "Date", "Time",
+                  "temperature...C.", "salinity..psu.","O.conc..µmol.l.", "Fluorometer",
+                  "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "NH4..µmol.l..",
+                  "Glacial.influence")
+
+meta_16S_nNA <-meta_16S[metadata_16S]%>% 
+  mutate_all(~ifelse(. %in% c("N/A", "null", ""), NA, .)) %>% 
+  na.omit()
+
+
+
+#z-scoring
+
+z_score_16S <- c("temperature...C.", "salinity..psu.","O.conc..µmol.l.", "Fluorometer",
+            "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "NH4..µmol.l..")
+
+
+meta_16S_nNA.z <- meta_16S_nNA
+
+meta_16S_nNA.z[z_score_16S] <- lapply(meta_16S_nNA.z[z_score_16S], function(x) {y <-scale(x, center = TRUE, scale = TRUE)})
+
+
+##eukaryotes
+
+#replace below detection with actual number
+meta_18S_r$PO4..µmol.l. <- gsub("<LOQ","0.001", meta_18S_r$PO4..µmol.l.)
+meta_18S_r$Si..µmol.l. <- gsub("<LOQ","0.001", meta_18S_r$Si..µmol.l.)
+
+meta_18S_r$PO4..µmol.l. <- as.numeric(meta_18S_r$PO4..µmol.l.)
+meta_18S_r$Si..µmol.l. <- as.numeric(meta_18S_r$Si..µmol.l.)
+
+
+#remove NAs and reduce to relevant metadata
+
+metadata_18S <- c("Site", "Region", "Fjord", "Latitude", "Longitude", "Date", "Time",
+                  "Temperature...C.", "Salinity..psu.","O.conc..µmol.l.", "Fluorometer",
+                  "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "NH4..µmol.l..",
+                  "Glacial.influence")
+
+meta_18S_nNA <-meta_18S_r[metadata_18S]%>% 
+  mutate_all(~ifelse(. %in% c("N/A", "null", ""), NA, .)) %>% 
+  na.omit()
+
+
+
+#z-scoring
+
+z_score_18S <- c("Temperature...C.", "Salinity..psu.","O.conc..µmol.l.", "Fluorometer",
+            "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "NH4..µmol.l..")
+
+
+meta_18S_nNA.z <- meta_18S_nNA
+
+meta_18S_nNA.z[z_score_18S] <- lapply(meta_18S_nNA.z[z_score_18S], function(x) {y <-scale(x, center = TRUE, scale = TRUE)})
+
+
+```
+
+
 ```{r nmds, fig.width=5,fig.height=5, fig.show="hold", out.width="50%"}
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/NMDS.R")
 
-nmds_plot(prok_hellinger, meta_16S)
-nmds_plot(euk_hellinger, meta_18S)
+nmds_plot(prok_aitchinson, meta_16S)
+nmds_plot(euk_aitchinson, meta_18S)
 
 ```
 *subsample those fjords where comparison between tip mouth / glacier influence is doable*
+
+```{r}
+euk_ait_df <- as.data.frame(as.matrix(euk_aitchinson))
+prok_ait_df <- as.data.frame(as.matrix(prok_aitchinson))
+#prok_ait_r_df <- as.data.frame(as.matrix(prok_aitchinson_r))
+```
+
 
 ```{r}
 #eukaryotes
@@ -81,7 +181,7 @@ a <- subset(meta_18S, meta_18S["In.Out"] == 1 | meta_18S["In.Out"] == 0)
 meta_tip_mouth_18S <- a%>%dplyr::filter(Fjord %in% Fjords)
 rownames(meta_tip_mouth_18S) <- meta_tip_mouth_18S$Site
 
-asv_tip_mouth_euk <- euk_hellinger_df%>%dplyr::select(rownames(meta_tip_mouth_18S))
+asv_tip_mouth_euk <- euk_ait_df%>%dplyr::select(rownames(meta_tip_mouth_18S))
 asv_tip_mouth_euk_a <- eukaryotes%>%dplyr::select(rownames(meta_tip_mouth_18S))
 
 asv_tip_mouth_euk <- asv_tip_mouth_euk[rowSums(asv_tip_mouth_euk)>0,]
@@ -93,10 +193,14 @@ a <- subset(meta_16S, meta_16S["In.Out"] == 1 | meta_16S["In.Out"] == 0)
 meta_tip_mouth_16S <- a %>%dplyr::filter(Fjord %in% Fjords)
 rownames(meta_tip_mouth_16S) <- meta_tip_mouth_16S$Site
 
-prok_hellinger_df <- as.data.frame(prok_hellinger)
+asv_tip_mouth_prok <- prok_ait_df%>%dplyr::select(rownames(meta_tip_mouth_16S)) 
+asv_tip_mouth_prok_a <- prokaryotes%>%dplyr::select(rownames(meta_tip_mouth_16S))
 
-asv_tip_mouth_prok <- prok_hellinger_df%>%dplyr::select(rownames(meta_tip_mouth_16S))
 asv_tip_mouth_prok <- asv_tip_mouth_prok[rowSums(asv_tip_mouth_prok)>0,]
+asv_tip_mouth_prok_a <- asv_tip_mouth_prok_a[rowSums(asv_tip_mouth_prok_a)>0,]
+
+asv_tip_mouth_prok_a_ait <- dczm(asv_tip_mouth_prok_a,5)
+asv_tip_mouth_prok_a_ait_df <- as.data.frame(as.matrix(asv_tip_mouth_prok_a_ait))
 
 ```
 
@@ -104,52 +208,40 @@ asv_tip_mouth_prok <- asv_tip_mouth_prok[rowSums(asv_tip_mouth_prok)>0,]
 ```{r}
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/NMDS_fjords.R")
 
-nmds_fjords(asv_tip_mouth_prok, meta_tip_mouth_16S)
-nmds_fjords(asv_tip_mouth_euk, meta_tip_mouth_18S)
+#nmds_fjords(asv_tip_mouth_prok_a_ait_df, meta_tip_mouth_16S)
+#nmds_fjords(asv_tip_mouth_euk, meta_tip_mouth_18S)
 
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/NMDS_fjords_eukr.R")
 
-nmds_fjords_r(euk_hellinger, meta_18S_r)
 
+nmds_fjords_r(euk_ait_df, meta_18S_r)
+nmds_fjords_r(prok_ait_df, meta_16S)
 ```
 
 
 RDA
 ```{r}
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/RDA_plots.R")
+source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/RDA_ordistep.R")
 
-#prep data for testrun
-metadata <- c("Site", "Region", "Fjord", "Latitude", "Longitude", "Temperature...C.", "Salinity..psu.", "Fluorometer",
-              "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.")
+RDA_input_18S <- c("Site","Temperature...C.", "Salinity..psu.","O.conc..µmol.l.", "Fluorometer",
+                   "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "NH4..µmol.l..")
 
-meta_d <- c("Temperature...C.", "Salinity..psu.", "Fluorometer",
-            "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.")
-metaD <- c("Fluorometer", "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.")
-RDAcondition <- c("Temperature...C.", "Salinity..psu.")
+euk_clr_nNA <- euk_clr%>%dplyr::select(meta_18S_nNA.z$Site)
 
+ordi(euk_clr_nNA, meta_18S_nNA.z[RDA_input_18S])
 
-meta_euk_glacier <- meta_18S_r%>%dplyr::filter(Glacial.influence == "Yes")
-rownames(meta_euk_glacier) <- meta_euk_glacier$Site
-df <-meta_euk_glacier[metadata]
-#remove NAs this needs to be changed otherwise we'll have trouble with too few datapoints
+#ordistep function confirms that all variables contribute significantly
 
-meta.v <-df%>% 
-  mutate_all(~ifelse(. %in% c("N/A", "null", ""), NA, .)) %>% 
-  na.omit()
+#RDA plot
 
 
-#replace below detection with actual number
-meta.v$PO4..µmol.l. <- gsub("<LOQ","0.001", meta.v$PO4..µmol.l.)
-meta.v$Si..µmol.l. <- gsub("<LOQ","0.001", meta.v$Si..µmol.l.)
 
-meta.v$PO4..µmol.l. <- as.numeric(meta.v$PO4..µmol.l.)
-meta.v$Si..µmol.l. <- as.numeric(meta.v$Si..µmol.l.)
 
-ASV.clr <- euk_clr%>%dplyr::select(meta.v$Site)
-ASV.hellinger <- euk_hellinger_df%>%dplyr::select(meta.v$Site)
+ASV.ait <- euk_ait_df%>%dplyr::select(meta.v$Site)
 
 RDA_plots(meta.v, ASV.clr, ASV.hellinger)
-RDA_partial_plots(meta.v, ASV.clr, metaD, RDAcondition)
+#RDA_partial_plots(meta.v, ASV.clr, metaD, RDAcondition)
 
 ##no glacier
 
@@ -195,9 +287,9 @@ source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/indicator_
 #indicator(prok_hellinger, meta_16S$Glacial.influence, taxonomy_16S)
 
 tax_18S_tipmouth <- taxonomy_18S%>%dplyr::filter(ASV %in% rownames(asv_tip_mouth_euk_a))
-tax_18S_hell_r <- taxonomy_18S%>%dplyr::filter(ASV %in% rownames(euk_hellinger))
+tax_18S_clr_r <- taxonomy_18S%>%dplyr::filter(ASV %in% rownames(euk_clr))
 
-indicator(euk_hellinger, meta_18S_r$Glacial.influence, tax_18S_hell_r)
+indicator(euk_clr, meta_18S_r$Glacial.influence, tax_18S_clr_r)
 
 indicator_euks <- Indicator_summary_t%>%dplyr::filter(p.value <= 0.001)
 indicator_euks_GLACIER <- indicator_euks%>%dplyr::filter(index == 2)
@@ -239,20 +331,6 @@ non-glacier: fungi (Opisthokonta),	Phaeocystis
 https://doi.org/10.1093/bib/bbaa290
 
 ```{r}
-require("NetCoMi")
-
-
-#for network analysis the samples need to be split according to their geographic location
-
-tax_18S_r <- taxonomy_18S%>%dplyr::filter(ASV %in% rownames(euk_r))
-
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/network_netCoMi.R")
-network_netCoMi(euk_r, tax_18S_r, meta_18S_r)
-#network_netCoMi(asv_tip_mouth_euk, tax_18S_tipmouth, meta_tip_mouth_18S)
-```
-
-
-```{r}
 #concatenate the ASV tables after clr transformation
 
 meta_all <- dplyr::inner_join(meta_16S, meta_18S_r[1:2], by="Station")
@@ -284,13 +362,39 @@ taxonomy_16S_r_rename <- taxonomy_16S_r%>%rename_at(vars(df$t_16S), ~ df$trans)
 taxonomy_18S_r <- taxonomy_18S%>%dplyr::select(df$t_18S)
 taxonomy_18S_r_rename <- taxonomy_18S_r%>%rename_at(vars(df$t_18S), ~ df$trans)
 
+#select only the indicator ASVs for 18S 
+
+taxonomy_18S_r_rename_Glacier <- taxonomy_18S_r_rename%>%dplyr::filter(rownames(taxonomy_18S_r_rename) %in% indicator_euks_GLACIER$ASV)
+
+taxonomy_18S_r_rename_NoGlacier <- taxonomy_18S_r_rename%>%dplyr::filter(rownames(taxonomy_18S_r_rename) %in% indicator_euks_NO_GLACIER$ASV)
+
+###
+taxonomy_merged_G <- rbind(taxonomy_16S_r_rename, taxonomy_18S_r_rename_Glacier)
+taxonomy_merged_G_clr <- taxonomy_merged_G%>%dplyr::filter(rownames(taxonomy_merged_G) %in% rownames(merged_clr_all))
+
+taxonomy_merged_NG <- rbind(taxonomy_16S_r_rename, taxonomy_18S_r_rename_NoGlacier)
+taxonomy_merged_NG_clr <- taxonomy_merged_NG%>%dplyr::filter(rownames(taxonomy_merged_NG) %in% rownames(merged_clr_all))
+
 taxonomy_merged <- rbind(taxonomy_16S_r_rename, taxonomy_18S_r_rename)
 taxonomy_merged_clr <- taxonomy_merged%>%dplyr::filter(rownames(taxonomy_merged) %in% rownames(merged_clr_all))
 
 #replace "uncultured" with empty field
 
 taxonomy_merged_clr$Tax_6 <- gsub("uncultured","",taxonomy_merged_clr$Tax_6)
+taxonomy_merged_G_clr$Tax_6 <- gsub("uncultured","",taxonomy_merged_G_clr$Tax_6)
+taxonomy_merged_NG_clr$Tax_6 <- gsub("uncultured","",taxonomy_merged_NG_clr$Tax_6)
 ```
+
+
+
+#heatmap with indicators
+```{r}
+source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/correlation_Indicators.R")
+
+dendro_heat(cor_glacier_genus)
+dendro_heat(cor_NOglacier_genus)
+```
+
 
 network analysis with both 16S and 18S
 ```{r}
@@ -315,31 +419,118 @@ source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/network_ne
   all = merge_phyloseq(phyloseq_merged, map) ####merge data into phyloseq
   all
   
+  #glacier
+  
+  OTU = otu_table(merged_clr_all, taxa_are_rows = TRUE)
+  
+  tax.matrix<- as.matrix(taxonomy_merged_G_clr)
+  TAX = tax_table(tax.matrix)
+  rownames(meta_all) <- meta_all$Station
+  map = sample_data(meta_all)
+  
+  phyloseq_merged_G = phyloseq(OTU, TAX)
+  all_G = merge_phyloseq(phyloseq_merged_G, map) ####merge data into phyloseq
+  all_G
+  
+  #no glacier
+  
+  
+  OTU = otu_table(merged_clr_all, taxa_are_rows = TRUE)
+  
+  tax.matrix<- as.matrix(taxonomy_merged_NG_clr)
+  TAX = tax_table(tax.matrix)
+  rownames(meta_all) <- meta_all$Station
+  map = sample_data(meta_all)
+  
+  phyloseq_merged_NG = phyloseq(OTU, TAX)
+  all_NG = merge_phyloseq(phyloseq_merged_NG, map) ####merge data into phyloseq
+  all_NG
+  
   # group network analysis
   
+#own_split <- metagMisc::phyloseq_sep_variable(all, 
+#                                                "Region") 
+
 own_split <- metagMisc::phyloseq_sep_variable(all, 
-                                                "Region") 
+                                                "Glacial.influence") 
 
-amgut_genus_NN <- phyloseq::tax_glom(own_split$North.Norway, taxrank = "Tax_6")
-amgut_genus_Sv <- phyloseq::tax_glom(own_split$Svalbard, taxrank = "Tax_6")
-amgut_genus_SN <- phyloseq::tax_glom(own_split$South.Norway, taxrank = "Tax_6")
+amgut_genus_glacier_Y <- phyloseq::tax_glom(own_split$Yes, taxrank = "Tax_6")
+
+
+#own_split <- metagMisc::phyloseq_sep_variable(all_NG, 
+#                                                "Glacial.influence") 
+
+
+amgut_genus_glacier_N <- phyloseq::tax_glom(own_split$No, taxrank = "Tax_6")
+
+a(amgut_genus_glacier_Y)
+a(amgut_genus_glacier_N)
+
+
+
+#amgut_genus_NN <- phyloseq::tax_glom(own_split$North.Norway, taxrank = "Tax_6")
+#amgut_genus_Sv <- phyloseq::tax_glom(own_split$Svalbard, taxrank = "Tax_6")
+#amgut_genus_SN <- phyloseq::tax_glom(own_split$South.Norway, taxrank = "Tax_6")
 #amgut_genus_I <- phyloseq::tax_glom(own_split$Iceland, taxrank = "Tax_6")
-amgut_genus_WG <- phyloseq::tax_glom(own_split$West.Greenland, taxrank = "Tax_6")
+#amgut_genus_WG <- phyloseq::tax_glom(own_split$West.Greenland, taxrank = "Tax_6")
   
-  a(amgut_genus_NN) #NG
-a(amgut_genus_SN) #NG
-a(amgut_genus_Sv) #G
+#a(amgut_genus_NN) #NG
+#a(amgut_genus_SN) #NG
+#a(amgut_genus_Sv) #G
 #a(amgut_genus_I) #G
-a(amgut_genus_WG) #G
+#a(amgut_genus_WG) #G
 
-
-network_netCoMi_all(merged_clr_all, taxonomy_merged_clr, meta_all)
 ```
 
 
 bar with ASVs from network
 
 ```{r}
+#GLACIER
+#	Dino-Group-II-Clade-1_X
+
+colnames(tax_table(all))
+
+taxtab <- all@tax_table@.Data
+  
+  # Find undefined taxa (in this data set, unknowns occur only up to Rank5)
+  miss_f <- which(taxtab[, "Tax_6"] == "f__")
+  miss_g <- which(taxtab[, "Tax_5"] == "g__")
+  
+  # Number unspecified genera
+  taxtab[miss_f, "Tax_6"] <- paste0("f__", 1:length(miss_f))
+  taxtab[miss_g, "Tax_5"] <- paste0("g__", 1:length(miss_g))
+  
+  # Find duplicate genera
+  dupl_g <- which(duplicated(taxtab[, "Tax_6"]) |
+                    duplicated(taxtab[, "Tax_6"], fromLast = TRUE))
+  
+  for(i in seq_along(taxtab)){
+    # The next higher non-missing rank is assigned to unspecified genera
+    if(i %in% miss_f && i %in% miss_g){
+      taxtab[i, "Tax_6"] <- paste0(taxtab[i, "Tax_6"], "(", taxtab[i, "Tax_4"], ")")
+    } else if(i %in% miss_g){
+      taxtab[i, "Tax_6"] <- paste0(taxtab[i, "Tax_6"], "(", taxtab[i, "Tax_5"], ")")
+    }
+    
+    # Family names are added to duplicate genera
+    if(i %in% dupl_g){
+      taxtab[i, "Tax_6"] <- paste0(taxtab[i, "Tax_6"], "(", taxtab[i, "Tax_6"], ")")
+    }
+  }
+  
+  all@tax_table@.Data <- taxtab
+  rownames(all@otu_table@.Data) <- taxtab[, "Tax_6"]
+
+  
+erie_family_p <- all %>%
+  tax_glom(taxrank = "Tax_6", NArm=TRUE, bad_empty=c(NA, "", " ", "\t","f__()", "f__( )")) %>%   # agglomerate at phylum level
+  
+  psmelt() %>% # Melt to long format
+  #filter(Abundance > 0) %>%    #be careful- here we removed everything what is relatively depleted in the sample!
+  arrange(Tax_1)  
+
+DinoGroupIIClade1 <- erie_family_p%>%filter(Tax_6 == "Dino-Group-II-Clade-1")
 
   
 ```
