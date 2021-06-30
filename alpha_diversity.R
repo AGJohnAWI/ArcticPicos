@@ -1,5 +1,32 @@
 ##alpha diversity
 
+
+diversity_iNEXT<-function(abundance){
+  suppressPackageStartupMessages(require("dplyr"))
+  suppressPackageStartupMessages(require("vegan"))
+  require(iNEXT)
+  print(packageVersion("iNEXT"))
+  
+  iNEXT_diversity = iNEXT(abundance, q=0,datatype = "abundance", conf = 0.95,nboot = 10)
+  iNEXT_diversity = iNEXT_diversity$AsyEst
+  iNEXT_diversity_observed = iNEXT_diversity[,c(1:3)]
+  iNEXT_diversity_observed = spread(iNEXT_diversity_observed, Diversity, Observed)
+  
+  iNEXT_diversity_observed = iNEXT_diversity_observed%>%
+    dplyr::rename(Richness = `Species richness`)%>%
+    dplyr::rename(Shannon = `Shannon diversity`)%>%
+    dplyr::rename(Simpson = `Simpson diversity`)
+  iNEXT_diversity_observed$Site <- as.character(iNEXT_diversity_observed$Site)
+  
+  iNEXT_diversity_observed <- as_tibble(iNEXT_diversity_observed)
+  
+  return(iNEXT_diversity_observed)
+  #rm(iNEXT_diversity)
+  detach("package:iNEXT", unload=TRUE)
+  detach("package:dplyr", unload=TRUE)
+}
+
+
 diversity_rarecurve<-function(ASV_table){
   
   require(iNEXT)

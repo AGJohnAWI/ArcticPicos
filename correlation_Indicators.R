@@ -1,6 +1,7 @@
 
 #soure: https://stackoverflow.com/questions/42047896/joining-a-dendrogram-and-a-heatmap
 
+require(phyloseq)
 
 #attach the 18 Data to 16S metadata
 indicator_glacier <- indicator_euks_GLACIER$ASV

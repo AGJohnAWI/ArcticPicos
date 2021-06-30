@@ -42,6 +42,8 @@ eukaryotes <- eukaryotes[rowSums(eukaryotes)>0,]
 
 taxonomy_18S <- taxonomy_18S%>%dplyr::filter(ASV %in% rownames(eukaryotes))
 
+rownames(taxonomy_18S) <- taxonomy_18S$ASV
+
 #rownames(taxonomy_18S) <- taxonomy_18S$X
 
 #eukaryotes <- eukaryotes%>%dplyr::filter(rownames(eukaryotes) %in% taxonomy_18S$X)

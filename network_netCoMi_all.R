@@ -5,7 +5,9 @@
   
   # Agglomerate to order level
   
-a <- function(amgut_genus){taxtab <- amgut_genus@tax_table@.Data
+a <- function(amgut_genus){
+  
+  taxtab <- amgut_genus@tax_table@.Data
   
   # Find undefined taxa (in this data set, unknowns occur only up to Rank5)
   miss_f <- which(taxtab[, "Tax_6"] == "f__")
@@ -62,7 +64,7 @@ a <- function(amgut_genus){taxtab <- amgut_genus@tax_table@.Data
   plot(props_single3,
        layout = "layout_with_fr",
        shortenLabels = "simple",
-       labelLength = 10,
+       labelLength = 15,
        charToRm = "g__",
        labelScale = FALSE,
        rmSingles = TRUE,
