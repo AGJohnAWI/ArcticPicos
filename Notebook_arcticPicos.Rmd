@@ -18,7 +18,7 @@ library(tibble) #for "rownames_to_column('Site')"
 library(geodist)
 library(reshape2)
 library(UpSetR)
-library(ComplexHeatmap)
+library(ComplexHeatmap)#if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager") BiocManager::install("ComplexHeatmap")
 ```
 
 ```{r import_data, echo=TRUE, warning=FALSE}
@@ -52,14 +52,93 @@ meta_18S_r <- meta_18S%>%dplyr::filter(Site %in% colnames(euk_r))
 #map
 ```{r}
 
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/map.R")
+source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/map.R", encoding = "UTF-8")
+
+```
+
+# metadata removing NAs and z-scoring 
+```{r z_score}
+##prokaryotes
+
+#replace below detection with actual number
+meta_16S$PO4..µmol.l. <- gsub("<LOQ","0.001", meta_16S$PO4..µmol.l.)
+meta_16S$Si..µmol.l. <- gsub("<LOQ","0.001", meta_16S$Si..µmol.l.)
+
+meta_16S$PO4..µmol.l. <- as.numeric(meta_16S$PO4..µmol.l.)
+meta_16S$Si..µmol.l. <- as.numeric(meta_16S$Si..µmol.l.)
+
+
+#remove NAs and reduce to relevant metadata
+
+metadata_16S <- c("Site", "Station", "Region", "Fjord", "Latitude", "Longitude", "Date", "Time",
+                  "temperature...C.", "salinity..psu.","O.conc..µmol.l.", "Fluorometer",
+                  "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.",
+                  "Glacial.influence")
+
+meta_16S_nNA <-meta_16S[metadata_16S]%>% 
+  mutate_all(~ifelse(. %in% c("N/A", "null", ""), NA, .)) %>% 
+  na.omit()
+
+
+
+#z-scoring
+
+z_score_16S <- c("temperature...C.", "salinity..psu.","O.conc..µmol.l.", "Fluorometer",
+            "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.")
+
+
+meta_16S_nNA.z <- meta_16S_nNA
+
+meta_16S_nNA.z[z_score_16S] <- lapply(meta_16S_nNA.z[z_score_16S], function(x) {y <-scale(x, center = TRUE, scale = TRUE)})
+
+
+##eukaryotes
+
+#replace below detection with actual number
+meta_18S_r$PO4..µmol.l. <- gsub("<LOQ","0.001", meta_18S_r$PO4..µmol.l.)
+meta_18S_r$Si..µmol.l. <- gsub("<LOQ","0.001", meta_18S_r$Si..µmol.l.)
+
+meta_18S_r$PO4..µmol.l. <- as.numeric(meta_18S_r$PO4..µmol.l.)
+meta_18S_r$Si..µmol.l. <- as.numeric(meta_18S_r$Si..µmol.l.)
+
+
+#remove NAs and reduce to relevant metadata
+
+metadata_18S <- c("Site","Station", "Region", "Fjord", "Latitude", "Longitude", "Date", "Time",
+                  "Temperature...C.", "Salinity..psu.","O.conc..µmol.l.", "Fluorometer",
+                  "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.",
+                  "Glacial.influence")
+
+meta_18S_nNA <-meta_18S_r[metadata_18S]%>% 
+  mutate_all(~ifelse(. %in% c("N/A", "null", ""), NA, .)) %>% 
+  na.omit()
+
+
+
+#z-scoring
+
+z_score_18S <- c("Temperature...C.", "Salinity..psu.","O.conc..µmol.l.", "Fluorometer",
+            "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.")
+
+
+meta_18S_nNA.z <- meta_18S_nNA
+
+meta_18S_nNA.z[z_score_18S] <- lapply(meta_18S_nNA.z[z_score_18S], function(x) {y <-scale(x, center = TRUE, scale = TRUE)})
+
 
 ```
 # metadata exploration (note: the code for the meta_all is further down until now)
 ```{r meta, echo=TRUE, fig.width=7,fig.height=3.5, fig.show="hold", out.width="50%"}
-#source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/env_data.R", encoding = "UTF-8")
+source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/MLD_DK.R", encoding = "UTF-8")
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/MLD_calculations.R", encoding = "UTF-8")
+
+meta_all <- dplyr::inner_join(meta_16S_m, meta_18S_nNA[1:2], by="Station")
+
 ```
+```{r}
+source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/env_data.R", encoding = "UTF-8")
+```
+
 
 
 ```{r alpha_div, echo=TRUE, fig.width=7,fig.height=3.5, fig.show="hold", out.width="50%"}
@@ -110,77 +189,6 @@ euk_clr <- clr(euk_r,1)
 prok_clr <- clr(prokaryotes, 5)
 ```
 
-# metadata removing NAs and z-scoring 
-```{r z_score}
-##prokaryotes
-
-#replace below detection with actual number
-meta_16S$PO4..µmol.l. <- gsub("<LOQ","0.001", meta_16S$PO4..µmol.l.)
-meta_16S$Si..µmol.l. <- gsub("<LOQ","0.001", meta_16S$Si..µmol.l.)
-
-meta_16S$PO4..µmol.l. <- as.numeric(meta_16S$PO4..µmol.l.)
-meta_16S$Si..µmol.l. <- as.numeric(meta_16S$Si..µmol.l.)
-
-
-#remove NAs and reduce to relevant metadata
-
-metadata_16S <- c("Site", "Region", "Fjord", "Latitude", "Longitude", "Date", "Time",
-                  "temperature...C.", "salinity..psu.","O.conc..µmol.l.", "Fluorometer",
-                  "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.",
-                  "Glacial.influence")
-
-meta_16S_nNA <-meta_16S[metadata_16S]%>% 
-  mutate_all(~ifelse(. %in% c("N/A", "null", ""), NA, .)) %>% 
-  na.omit()
-
-
-
-#z-scoring
-
-z_score_16S <- c("temperature...C.", "salinity..psu.","O.conc..µmol.l.", "Fluorometer",
-            "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.")
-
-
-meta_16S_nNA.z <- meta_16S_nNA
-
-meta_16S_nNA.z[z_score_16S] <- lapply(meta_16S_nNA.z[z_score_16S], function(x) {y <-scale(x, center = TRUE, scale = TRUE)})
-
-
-##eukaryotes
-
-#replace below detection with actual number
-meta_18S_r$PO4..µmol.l. <- gsub("<LOQ","0.001", meta_18S_r$PO4..µmol.l.)
-meta_18S_r$Si..µmol.l. <- gsub("<LOQ","0.001", meta_18S_r$Si..µmol.l.)
-
-meta_18S_r$PO4..µmol.l. <- as.numeric(meta_18S_r$PO4..µmol.l.)
-meta_18S_r$Si..µmol.l. <- as.numeric(meta_18S_r$Si..µmol.l.)
-
-
-#remove NAs and reduce to relevant metadata
-
-metadata_18S <- c("Site", "Region", "Fjord", "Latitude", "Longitude", "Date", "Time",
-                  "Temperature...C.", "Salinity..psu.","O.conc..µmol.l.", "Fluorometer",
-                  "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.",
-                  "Glacial.influence")
-
-meta_18S_nNA <-meta_18S_r[metadata_18S]%>% 
-  mutate_all(~ifelse(. %in% c("N/A", "null", ""), NA, .)) %>% 
-  na.omit()
-
-
-
-#z-scoring
-
-z_score_18S <- c("Temperature...C.", "Salinity..psu.","O.conc..µmol.l.", "Fluorometer",
-            "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.")
-
-
-meta_18S_nNA.z <- meta_18S_nNA
-
-meta_18S_nNA.z[z_score_18S] <- lapply(meta_18S_nNA.z[z_score_18S], function(x) {y <-scale(x, center = TRUE, scale = TRUE)})
-
-
-```
 
 
 ```{r nmds, fig.width=5,fig.height=5, fig.show="hold", out.width="50%"}
