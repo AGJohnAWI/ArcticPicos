@@ -283,16 +283,6 @@ taxonomy_16S_clr <- taxonomy_16S%>%filter(rownames %in% rownames(prok_clr))
 taxonomy_16S_clr$ASV <- taxonomy_16S_clr$rownames
 
 ```
-
-
-
-```{r nmds, fig.width=5,fig.height=5, fig.show="hold", out.width="50%"}
-#source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/NMDS.R")
-
-#nmds_plot(prok_aitchinson, meta_16S)
-#nmds_plot(euk_aitchinson, meta_18S)
-
-```
 *subsample those fjords where comparison between tip mouth / glacier influence is doable*
 
 ```{r}
@@ -300,21 +290,6 @@ euk_ait_df <- as.data.frame(as.matrix(euk_aitchinson))
 prok_ait_df <- as.data.frame(as.matrix(prok_aitchinson))
 #prok_ait_r_df <- as.data.frame(as.matrix(prok_aitchinson_r))
 ```
-
-#NMDS of tip/moth of fjords
-```{r}
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/NMDS_fjords.R")
-
-#nmds_fjords(asv_tip_mouth_prok_a_ait_df, meta_tip_mouth_16S)
-#nmds_fjords(asv_tip_mouth_euk, meta_tip_mouth_18S)
-
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/NMDS_fjords_eukr.R")
-
-
-#nmds_fjords_r(euk_ait_df, meta_18S_r)
-#nmds_fjords_r(prok_ait_df, meta_16S)
-```
-
 
 RDA
 ```{r}
@@ -369,6 +344,9 @@ meta_sig <- c("Temperature...C.", "Salinity..psu.", "Fluorometer",
 RDA_plots(meta_18S_nNA.z, euk_clr_nNA, euk_ait_nNA)
 
 ```
+
+
+load("~/Studenten/arctic_picos/Submission/RData_20210811.RData")
 
 #distance analysis
 
