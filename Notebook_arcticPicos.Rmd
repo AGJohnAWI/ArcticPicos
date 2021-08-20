@@ -1,6 +1,8 @@
 ---
 title: "Arctic picos"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
@@ -15,10 +17,10 @@ library(dplyr)
 library(ggplot2)
 library(vegan)
 library(tibble) #for "rownames_to_column('Site')" 
-library(geodist)
+#library(geodist)
 library(reshape2)
-library(UpSetR)
-library(ComplexHeatmap)#if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager") BiocManager::install("ComplexHeatmap")
+#library(UpSetR)
+#library(ComplexHeatmap)#if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager") BiocManager::install("ComplexHeatmap")
 ```
 
 ```{r import_data, echo=TRUE, warning=FALSE}
@@ -26,36 +28,26 @@ source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/import.R",
 
 ```
 
-#remove outliers
-```{r}
-outliers <- c("HE533.Euk.F02.04C_S9", "HE533.Euk.F02.08B_S20", "HE533.Euk.F02.08C_S21", "HE533.Euk.F02.09A_S22",
+# remove replicates and outliers
+
+outliers arose from crysochromulina bloom (John et al. in prep) and replicates only available from HE533, thus we always used Rep. A from each site.
+```{r remove_replicates, echo=TRUE, warning=FALSE}
+outliers_euks <- c("HE533.Euk.F02.04C_S9", "HE533.Euk.F02.08B_S20", "HE533.Euk.F02.08C_S21", "HE533.Euk.F02.09A_S22",
               "HE533.Euk.F02.10A_S25", "HE533.Euk.F02.10C_S27", "HE533.Euk.F02.11A_S28", "HE533.Euk.F02.11C_S30",
               "HE533.Euk.F02.12B_S32", "HE533.Euk.F02.12C_S33", "HE533.Euk.F02.19C_S54", "HE533.Euk.F02.22C_S63")
 
-#outliers_prok <- c("HE533.Prok.F02.4C_S11", "HE533.Prok.F02.8B_S26" ,"HE533.Prok.F02.8C_S27", #"HE533.Prok.F02.9A_S29",
-#                   "HE533.Prok.F02.10A_S33", "HE533.Prok.F02.11A_S37", "HE533.Prok.F02.11C_S39",
-#                   "HE533.Prok.F02.12B_S42", "HE533.Prok.F02.12C_S43", "HE533.Prok.F02.19C_S71",
-#                   "HE533.Prok.F02.22C_S83")
-
 #remove replicates
 
-rep_18S <- c("HE533.Euk.F02.25B_S68", "HE533.Euk.F02.25C_S69", "HE533.Euk.F02.26B_S71", "HE533.Euk.F02.26C_S72",
-         "HE533.Euk.F02.27B_S74", "HE533.Euk.F02.27C_S75", "HE533.Euk.F02.28B_S77", "HE533.Euk.F02.28C_S78",
-         "HE533.Euk.F02.21B_S59", "HE533.Euk.F02.21C_S60", "HE533.Euk.F02.22B_S62", "HE533.Euk.F02.23B_S65",
-         "HE533.Euk.F02.23C_S66", "HE533.Euk.F02.17B_S47", "HE533.Euk.F02.17C_S48", "HE533.Euk.F02.18B_S50",
-         "HE533.Euk.F02.18C_S51", "HE533.Euk.F02.19B_S53", "HE533.Euk.F02.20B_S56", "HE533.Euk.F02.20C_S57",
-         "HE533.Euk.F02.13C_S36", "HE533.Euk.F02.14B_S38", "HE533.Euk.F02.14C_S39", "HE533.Euk.F02.15B_S41",
-         "HE533.Euk.F02.15C_S42", "HE533.Euk.F02.16B_S44", "HE533.Euk.F02.16C_S45", "HE533.Euk.F02.07B_S17",
-         "HE533.Euk.F02.07C_S18", "HE533.Euk.F02.09C_S24", "HE533.Euk.F02.04B_S8", "HE533.Euk.F02.05B_S11",
-         "HE533.Euk.F02.05C_S12", "HE533.Euk.F02.06B_S14", "HE533.Euk.F02.06C_S15", "HE533.Euk.F02.2B_S2",
-         "HE533.Euk.F02.2C_S3", "HE533.Euk.F02.3B_S5", "HE533.Euk.F02.3C_S6")
+rep_18S <- c("HE533.Euk.F02.25B_S68", "HE533.Euk.F02.25C_S69", "HE533.Euk.F02.26B_S71", "HE533.Euk.F02.26C_S72", "HE533.Euk.F02.27B_S74", "HE533.Euk.F02.27C_S75", "HE533.Euk.F02.28B_S77", "HE533.Euk.F02.28C_S78",
+"HE533.Euk.F02.21B_S59", "HE533.Euk.F02.21C_S60", "HE533.Euk.F02.22B_S62", "HE533.Euk.F02.23B_S65", "HE533.Euk.F02.23C_S66", "HE533.Euk.F02.17B_S47", "HE533.Euk.F02.17C_S48", "HE533.Euk.F02.18B_S50", "HE533.Euk.F02.18C_S51", "HE533.Euk.F02.19B_S53", "HE533.Euk.F02.20B_S56", "HE533.Euk.F02.20C_S57",
+"HE533.Euk.F02.13C_S36", "HE533.Euk.F02.14B_S38", "HE533.Euk.F02.14C_S39", "HE533.Euk.F02.15B_S41", "HE533.Euk.F02.15C_S42", "HE533.Euk.F02.16B_S44", "HE533.Euk.F02.16C_S45", "HE533.Euk.F02.07B_S17", "HE533.Euk.F02.07C_S18", "HE533.Euk.F02.09C_S24", "HE533.Euk.F02.04B_S8", "HE533.Euk.F02.05B_S11",
+"HE533.Euk.F02.05C_S12", "HE533.Euk.F02.06B_S14", "HE533.Euk.F02.06C_S15", "HE533.Euk.F02.2B_S2", "HE533.Euk.F02.2C_S3", "HE533.Euk.F02.3B_S5", "HE533.Euk.F02.3C_S6")
 
-rep_16S <- c("HE533.Prok.F02.25B_S90",  "HE533.Prok.F02.25C_S91", "HE533.Prok.F02.26B_S94", "HE533.Prok.F02.26C_S95", "HE533.Prok.F02.27B_S98", "HE533.Prok.F02.27C_S99", "HE533.Prok.F02.28B_S102", "HE533.Prok.F02.28C_S103", "HE533.Prok.F02.21B_S78",  "HE533.Prok.F02.21C_S79", "HE533.Prok.F02.22B_S82",  "HE533.Prok.F02.22C_S83", "HE533.Prok.F02.23B_S86", "HE533.Prok.F02.23C_S87", "HE533.Prok.F02.17B_S62", "HE533.Prok.F02.17C_S63", "HE533.Prok.F02.18B_S66",  "HE533.Prok.F02.18C_S67", "HE533.Prok.F02.19B_S70",  "HE533.Prok.F02.19C_S71", "HE533.Prok.F02.20B_S74", "HE533.Prok.F02.20C_S75", "HE533.Prok.F02.11B_S38",  "HE533.Prok.F02.11C_S39", "HE533.Prok.F02.12B_S42",  "HE533.Prok.F02.12C_S43", "HE533.Prok.F02.13B_S46", "HE533.Prok.F02.13C_S47", "HE533.Prok.F02.14B_S50", "HE533.Prok.F02.14C_S51", "HE533.Prok.F02.15B_S54",  "HE533.Prok.F02.15C_S55", "HE533.Prok.F02.16B_S58",  "HE533.Prok.F02.16C_S59", "HE533.Prok.F02.10B_S22",  "HE533.Prok.F02.7B_S34",  "HE533.Prok.F02.7C_S23", "HE533.Prok.F02.8B_S26",   "HE533.Prok.F02.8C_S27", "HE533.Prok.F02.2B_S2", "HE533.Prok.F02.2C_S3", "HE533.Prok.F02.3B_S6", "HE533.Prok.F02.3C_S7",
-             "HE533.Prok.F02.4B_S10", "HE533.Prok.F02.4C_S11", "HE533.Prok.F02.5B_S14", "HE533.Prok.F02.5C_S15", "HE533.Prok.F02.6B_S18", "HE533.Prok.F02.6C_S19")
+rep_16S <- c("HE533.Prok.F02.25B_S90",  "HE533.Prok.F02.25C_S91", "HE533.Prok.F02.26B_S94", "HE533.Prok.F02.26C_S95", "HE533.Prok.F02.27B_S98", "HE533.Prok.F02.27C_S99", "HE533.Prok.F02.28B_S102", "HE533.Prok.F02.28C_S103", "HE533.Prok.F02.21B_S78",  "HE533.Prok.F02.21C_S79", "HE533.Prok.F02.22B_S82",  "HE533.Prok.F02.22C_S83", "HE533.Prok.F02.23B_S86", "HE533.Prok.F02.23C_S87", "HE533.Prok.F02.17B_S62", "HE533.Prok.F02.17C_S63", "HE533.Prok.F02.18B_S66",  "HE533.Prok.F02.18C_S67", "HE533.Prok.F02.19B_S70",  "HE533.Prok.F02.19C_S71", "HE533.Prok.F02.20B_S74", "HE533.Prok.F02.20C_S75", "HE533.Prok.F02.11B_S38",  "HE533.Prok.F02.11C_S39", "HE533.Prok.F02.12B_S42",  "HE533.Prok.F02.12C_S43", "HE533.Prok.F02.13B_S46", "HE533.Prok.F02.13C_S47", "HE533.Prok.F02.14B_S50", "HE533.Prok.F02.14C_S51", "HE533.Prok.F02.15B_S54",  "HE533.Prok.F02.15C_S55", "HE533.Prok.F02.16B_S58",  "HE533.Prok.F02.16C_S59", "HE533.Prok.F02.10B_S22",  "HE533.Prok.F02.7B_S34",  "HE533.Prok.F02.7C_S23", "HE533.Prok.F02.8B_S26",   "HE533.Prok.F02.8C_S27", "HE533.Prok.F02.2B_S2", "HE533.Prok.F02.2C_S3", "HE533.Prok.F02.3B_S6", "HE533.Prok.F02.3C_S7", "HE533.Prok.F02.4B_S10", "HE533.Prok.F02.4C_S11", "HE533.Prok.F02.5B_S14", "HE533.Prok.F02.5C_S15", "HE533.Prok.F02.6B_S18", "HE533.Prok.F02.6C_S19", "HE533.Prok.F02.9B_S30", "HE533.Prok.F02.9C_S31")
 
 ###remove outliers for better visualization
 
-euk_r <- eukaryotes%>%dplyr::select(!outliers)
+euk_r <- eukaryotes%>%dplyr::select(!outliers_euks)
 euk_r <- euk_r%>%dplyr::select(!rep_18S)
 euk_r <- euk_r[rowSums(euk_r)>0,]
 
@@ -65,18 +57,18 @@ prokaryotes = prok_r
 
 meta_18S_r <- meta_18S%>%dplyr::filter(Site %in% colnames(euk_r))
 meta_16S <- meta_16S%>%dplyr::filter(Site %in% colnames(prokaryotes))
-rm(outliers, rep_16S, rep_18S)
+rm(outliers_euks, rep_16S, rep_18S)
 ```
 
 #map
-```{r}
+```{r map, echo=FALSE, warning = FALSE, fig.width=6,fig.height=4}
 
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/map.R", encoding = "UTF-8")
 
 ```
 
 # metadata removing NAs and z-scoring 
-```{r z_score}
+```{r z_score, echo=FALSE, warning = FALSE}
 ##prokaryotes
 
 #replace below detection with actual number
@@ -129,16 +121,35 @@ meta_18S_nNA <-meta_18S_r[metadata_18S]%>%
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/MLD_DK.R", encoding = "UTF-8")
 eval(parse("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/MLD_calculations.R", encoding = "UTF-8"))
 
+```
+add seasonality (based on sun altitude and azimuth) to the analysis 
+
+
+```{r suncalc, echo=FALSE}
+source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/SunAngleCalc.R", encoding = "UTF-8")
+meta_sun2_16S <- Sunanglecalc(meta_16S_m)
+meta_sun2_18S <- Sunanglecalc(meta_18S_m)
+
+meta_16S_m <- dplyr::inner_join(meta_16S_m, meta_sun2_16S[,c("Site","altitude", "azimuth")], by = c("Site"))
+
+meta_18S_m <- dplyr::inner_join(meta_18S_m, meta_sun2_18S[,c("Site","altitude", "azimuth")], by = c("Site"))
+
+rm(meta_sun2_16S, meta_sun2_18S)
+
+```
+
+create list of metadata
+```{r}
+
 meta_all <- dplyr::inner_join(meta_16S_m, meta_18S_nNA[1:2], by="Station")
 meta_all$In.Out <- as.factor(meta_all$In.Out)
 
 list_meta <- sapply(ls(pattern="meta_"), function(x) get(x), simplify = FALSE)
 rm(list = ls(pattern="meta_"))
-
 ```
 
 
-```{r}
+```{r env_data, echo=FALSE, warning = FALSE, fig.width=6,fig.height=4, fig.show="hold", out.width="50%"}
 eval(parse("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/env_data.R", encoding = "UTF-8"))
 ```
 
@@ -177,16 +188,15 @@ rm(list = ls(pattern="_alpha"))
 
 ```
 
-```{r}
+
+
+```{r z_scoring}
 #z-scoring
 
-metadata_16S.z <- c("Site", "Station", "Region", "Fjord","In.Out", "Latitude", "Longitude", "Date", "Time",
-                  "temperature...C.", "salinity..psu.","O.conc..µmol.l.", "Fluorometer",
-                  "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.",
-                  "Glacial.influence", "MLD", "bottom_depth", "Current_flow", "Current_score")
+metadata_16S.z <- c("Site", "Station", "Region", "Fjord","In.Out", "Sill","Latitude", "Longitude", "Date", "Time", "temperature...C.", "salinity..psu.", "O.conc..µmol.l.", "Fluorometer", "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.",
+"Glacial.influence", "MLD", "bottom_depth", "Current_flow", "Current_score", "altitude", "azimuth")
 
-z_score_16S <- c("temperature...C.", "salinity..psu.","O.conc..µmol.l.", "Fluorometer",
-            "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "MLD", "bottom_depth")
+z_score_16S <- c("temperature...C.", "salinity..psu.","O.conc..µmol.l.", "Fluorometer", "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "MLD", "bottom_depth", "altitude", "azimuth")
 
 
 meta_16S_nNA.z <- list_meta$meta_16S_m
@@ -200,13 +210,10 @@ meta_16S_nNA.z[z_score_16S] <- lapply(meta_16S_nNA.z[z_score_16S], function(x) {
 
 #z-scoring
 
-z_score_18S <- c("Temperature...C.", "Salinity..psu.","O.conc..µmol.l.", "Fluorometer",
-            "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "MLD", "bottom_depth")
+z_score_18S <- c("Temperature...C.", "Salinity..psu.","O.conc..µmol.l.", "Fluorometer", "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "MLD", "bottom_depth", "altitude", "azimuth")
 
-metadata_18S.z <- c("Site","Station", "Region", "Fjord","In.Out", "Latitude", "Longitude", "Date", "Time",
-                  "Temperature...C.", "Salinity..psu.","O.conc..µmol.l.", "Fluorometer",
-                  "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.",
-                  "Glacial.influence", "MLD", "bottom_depth", "Current_flow", "Current_score")
+metadata_18S.z <- c("Site","Station", "Region", "Fjord","In.Out","Sill", "Latitude", "Longitude", "Date", "Time", "Temperature...C.", "Salinity..psu.", "O.conc..µmol.l.", "Fluorometer", "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.",
+"Glacial.influence", "MLD", "bottom_depth", "Current_flow", "Current_score", "altitude", "azimuth")
 
 meta_18S_nNA.z <- list_meta$meta_18S_m
 
@@ -228,7 +235,7 @@ meta_all.z[z_score_16S] <- lapply(meta_all.z[z_score_16S], function(x) {y <-scal
 
 ##cluster analysis metadata
 
-```{r}
+```{r env_cluster, echo=T, warning=F, fig.width=6,fig.height=4}
 require(dendextend)
 
 meta_all.z <- meta_all.z %>%
@@ -263,12 +270,12 @@ plot(dend)
 
 
 alpha diversity boxplots
-```{r div_boxplots}
+```{r div_boxplots, fig.width=6,fig.height=4}
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/boxplot_alphadiv.R")
 ```
 
 ## data transformations
-```{r transformations}
+```{r transformations, echo=TRUE, warning=FALSE}
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/transformation_CLR_aitchinson.R")
 
 euk_aitchinson <- dczm(euk_r, 1)
@@ -285,21 +292,21 @@ taxonomy_16S_clr$ASV <- taxonomy_16S_clr$rownames
 ```
 *subsample those fjords where comparison between tip mouth / glacier influence is doable*
 
-```{r}
+```{r ait_dataframe, echo=FALSE, warning=FALSE}
 euk_ait_df <- as.data.frame(as.matrix(euk_aitchinson))
 prok_ait_df <- as.data.frame(as.matrix(prok_aitchinson))
 #prok_ait_r_df <- as.data.frame(as.matrix(prok_aitchinson_r))
 ```
 
 RDA
-```{r}
+```{r RDA, echo=FALSE, warning=FALSE, fig.width=6,fig.height=4}
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/RDA_plots.R")
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/RDA_ordistep.R")
 
 ## prokaryotes
 
 RDA_input_16S <- c("Site","temperature...C.", "salinity..psu.", "Fluorometer",
-                   "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "MLD", "bottom_depth")
+                   "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "MLD", "bottom_depth", "altitude", "azimuth")
 
 prok_nNA <- prokaryotes%>%dplyr::select(meta_16S_nNA.z$Site)
 prok_clr_nNA <- prok_clr%>%dplyr::select(meta_16S_nNA.z$Site)
@@ -315,14 +322,14 @@ ordi(prok_clr_nNA, meta_16S_nNA.z[RDA_input_16S])
 #RDA plot
 
 meta_sig <- c("temperature...C.", "salinity..psu.", "Fluorometer",
-                   "PO4..µmol.l.", "NO3..µmol.l.", "bottom_depth")
+                   "PO4..µmol.l.", "NO3..µmol.l.", "bottom_depth", "altitude")
 
 RDA_plots(meta_16S_nNA.z, prok_clr_nNA, prok_ait_nNA)
 
 ## eukaryotes
 
 RDA_input_18S <- c("Site","Temperature...C.", "Salinity..psu.", "Fluorometer",
-                   "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "MLD", "bottom_depth")
+                   "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "MLD", "bottom_depth", "altitude", "azimuth")
 
 
 
@@ -337,7 +344,7 @@ ordi(euk_clr_nNA, meta_18S_nNA.z[RDA_input_18S])
 #ordistep function confirms that all variables contribute significantly
 
 meta_sig <- c("Temperature...C.", "Salinity..psu.", "Fluorometer",
-                   "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "bottom_depth")
+                   "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "bottom_depth", "altitude")
 
 #RDA plot
 
@@ -346,11 +353,9 @@ RDA_plots(meta_18S_nNA.z, euk_clr_nNA, euk_ait_nNA)
 ```
 
 
-load("~/Studenten/arctic_picos/Submission/RData_20210811.RData")
-
 #distance analysis
 
-```{r}
+```{r distance, echo=FALSE, warning=FALSE, fig.width=6,fig.height=4}
 require(metagMisc)
 require(kmed)
 ait_dist_vector <- dist2list(ait_dist_16S, tri = TRUE)
@@ -462,87 +467,14 @@ vegan::mantel(env_dist_current_euk, ait_dist_18S, method="pearson", permutations
 
 ```
 
-load("~/Studenten/arctic_picos/Submission/20210719_Rdata.RData")
-
-gdm glacier and non-glacier
-
-```{r}
-#using RDA_inputs + lat/long
-
-#source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/gdm.R")
-
-#gdm_input_16S <- c("Site","Latitude", "Longitude","temperature...C.",
-#                   "salinity..psu.","Current_flow")
-
-#gdm_input_18S <- c("Site","Latitude", "Longitude","Temperature...C.",
-#                   "Salinity..psu.","O.conc..µmol.l.", "Fluorometer",
-#                   "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "NH4..µmol.l..")
-
-#gdm_analysis(prok_ait_nNA, list_meta$meta_16S_m[gdm_input_16S])
-
-```
-
-
-# Indicator species
-
-https://jkzorz.github.io/2019/07/02/Indicator-species-analysis.html
-
-
-```{r}
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/indicator_species.R")
-
-#indicator(prok_hellinger, meta_16S$Glacial.influence, taxonomy_16S)
-
-tax_18S_clr_nNA <- taxonomy_18S%>%dplyr::filter(ASV %in% rownames(euk_clr_nNA))
-
-indicator(euk_clr, list_meta$meta_18S_r$Glacial.influence, tax_18S_clr_nNA)
-
-
-indicator_euks <- Indicator_summary_t%>%dplyr::filter(p.value <= 0.001)
-indicator_euks_GLACIER <- indicator_euks%>%dplyr::filter(index == 2)
-indicator_euks_NO_GLACIER <- indicator_euks%>%dplyr::filter(index == 1)
-
-#sort the indicators according to stats
-indicator_euks_GLACIER <- with(indicator_euks_GLACIER, indicator_euks_GLACIER[order(-indicator_euks_GLACIER$stat),])
-indicator_euks_NO_GLACIER <- with(indicator_euks_NO_GLACIER, indicator_euks_NO_GLACIER[order(-indicator_euks_NO_GLACIER$stat),])
-
-indicator_10_euks_glacier <- indicator_euks_GLACIER[c(1:10),]
-indicator_10_euks_NOglacier <- indicator_euks_NO_GLACIER[c(1:10),]
-
-#####
-indicator(prok_clr_nNA, list_meta$meta_16S_nNA$Glacial.influence, taxonomy_16S_clr)
-
-indicator_prok <- Indicator_summary_t%>%dplyr::filter(p.value <= 0.001)
-indicator_prok_GLACIER <- indicator_prok%>%dplyr::filter(index == 2)
-indicator_prok_NO_GLACIER <- indicator_prok%>%dplyr::filter(index == 1)
-
-#sort the indicators according to stats
-indicator_prok_GLACIER <- with(indicator_prok_GLACIER, indicator_prok_GLACIER[order(-indicator_prok_GLACIER$stat),])
-indicator_prok_NO_GLACIER <- with(indicator_prok_NO_GLACIER, indicator_prok_NO_GLACIER[order(-indicator_prok_NO_GLACIER$stat),])
-
-
-
-```
-
-#results (approx.)
-
-glacier euk communities Syndiniales + micromonas
-
-non-glacier: fungi (Opisthokonta),	Phaeocystis
-
-1) boxplot of the different species
-2) merge the large groups (if they fit) into one abundance
-3) network analyses- what are the central nodes in the two groups? 
-4) use this abundance for correlation analyses with bacteria
-
 #Network analyses
 
 https://doi.org/10.1093/bib/bbaa290
 
-```{r}
+```{r network_analysis_1, echo=FALSE, warning=FALSE}
 #concatenate the ASV tables after clr transformation
 
-meta_all <- dplyr::inner_join(list_meta$meta_16S, list_meta$meta_18S_r[1:2], by="Station")
+meta_all <- dplyr::inner_join(list_meta$meta_16S_m, list_meta$meta_18S_m[1:2], by="Station")
 
 Prok_r_clr <- prok_clr%>%dplyr::select(meta_all$Site.x)
 #rename the columns
@@ -589,61 +521,17 @@ taxonomy_merged_clr$Tax_5[is.na(taxonomy_merged_clr$Tax_5)] <- "g__"
 ```
 
 
-#heatmap with indicators
-```{r}
-#source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/correlation_Indicators.R")
-
-#dendro_heat(cor_glacier_genus)
-#dendro_heat(cor_NOglacier_genus)
-```
-
 
 network analysis with both 16S and 18S
-```{r}
+```{r network_analysis_all, echo=FALSE, warning=FALSE, fig.width=6,fig.height=4}
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/network_netCoMi_all.R")
 
 ```
 
 
 
-```{r}
+```{r network_individual, echo=FALSE, warning=FALSE, fig.width=6,fig.height=4}
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/network_individual.R")
 
-#only eukaryotes
-  
-  OTU = otu_table(Euk_r_clr_rename, taxa_are_rows = TRUE)
-  
-  tax.matrix<- as.matrix(taxonomy_18S_r_rename)
-  TAX = tax_table(tax.matrix)
-  rownames(meta_all) <- meta_all$Station
-  map = sample_data(meta_all)
-  
-  phyloseq_merged = phyloseq(OTU, TAX)
-  all_e = merge_phyloseq(phyloseq_merged, map) ####merge data into phyloseq
-  all_e
-
-  network_netCoMi(all_e)  
-  #only prokaryotes
-  
-  OTU = otu_table(Prok_r_clr_rename, taxa_are_rows = TRUE)
-  
-  tax.matrix<- as.matrix(taxonomy_16S_r_rename)
-  TAX = tax_table(tax.matrix)
-  rownames(meta_all) <- meta_all$Station
-  map = sample_data(meta_all)
-  
-  phyloseq_merged = phyloseq(OTU, TAX)
-  all_p = merge_phyloseq(phyloseq_merged, map) ####merge data into phyloseq
-  all_p
-  
-network_netCoMi(all_p)
-```
-
-bar with ASVs from network
-
-```{r}
-
-
-  
 ```
 

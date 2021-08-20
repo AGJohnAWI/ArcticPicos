@@ -50,8 +50,13 @@ all_MLD <- rbind(HE533_MLD, HE492_MLD, MSM21_MLD, MSM56_MLD, HE431_MLD_s)
 meta_map_MLD <- dplyr::left_join(meta_map_1, all_MLD, by = c("Latitude", "Longitude"))
 #now the calculate MLD needs to be added to metadata tables
 
-meta_16S_m <- left_join(meta_16S_nNA, meta_map_MLD[, c("Station", "MLD", "bottom_depth")], by = "Station")
-meta_18S_m <- left_join(meta_18S_nNA, meta_map_MLD[, c("Station", "MLD", "bottom_depth")], by = "Station")
+#remove the samples with NA Event
+
+meta_map_MLD <- meta_map_MLD[!is.na(meta_map_MLD$Event), ]
+
+
+meta_16S_m <- dplyr::left_join(meta_16S_nNA, meta_map_MLD[, c("Station", "MLD", "bottom_depth")], by = "Station")
+meta_18S_m <- dplyr::left_join(meta_18S_nNA, meta_map_MLD[, c("Station", "MLD", "bottom_depth")], by = "Station")
 
 
 #those samples with well mixed need to be turned into numbers

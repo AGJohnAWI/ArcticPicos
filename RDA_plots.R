@@ -1,6 +1,6 @@
 
 
-RDA_plots <- function(meta, ASV.clr, ASV.hellinger){
+RDA_plots <- function(meta, ASV.clr, ASV.ait){
   
   #load additional packages
   suppressPackageStartupMessages(require("ggords"))
@@ -17,12 +17,15 @@ RDA_plots <- function(meta, ASV.clr, ASV.hellinger){
   ASV.clr.t.sort <- as.matrix(data.matrix(ASV.clr.t.sort))
   meta.wf <- with(meta, meta[order(Site),])
   
-  meta.wf.data <- meta.wf[meta_d]
+  meta.wf.data <- meta.wf[meta_sig]
   gr <- meta.wf$Region
   grl <- factor(gr)
   
   gr2 <- meta.wf$Fjord
   curl.n <- factor(gr2)
+  
+  gr3 <- meta.wf$Glacial.influence
+  curl.G <- factor(gr3)
   #RDA
   ASV.clr.rda <- rda(
     ASV.clr.t.sort ~ .,
@@ -31,6 +34,7 @@ RDA_plots <- function(meta, ASV.clr, ASV.hellinger){
   
   
   print(ASV.clr.rda)
+  #return(ASV.clr.rda)
 
   ###
   
@@ -48,24 +52,69 @@ RDA_plots <- function(meta, ASV.clr, ASV.hellinger){
   
   #par(xpd=TRUE)
   #provinces
-  print(ggrda(ASV.clr.rda,group = curl.n, spearrow = NULL, farrow = 0.1, fzoom = 5, ellipse = T, scaling = 2, spe = F, obslab = T, obssize = 2)+
-          scale_color_manual(name = "Groups",values = c("#A64995", "#BDD014", "#442D87", "#2B62FC", "#A331A0", "#720E34", "#CEC521", "#D80E51","#3FE8E0", "#E85105", "#E58910")) +
-          scale_shape_manual(name = "Groups",values = c(16,16,16,16,16,16,16,16,16,16,16))) #for station names include: obslab = T, obssize = 2
+  print(ggrda(ASV.clr.rda, group = grl, spearrow = NULL, farrow = 0.1, fzoom = 5, ellipse = T, scaling = 2, spe = F)+
+          scale_color_manual(name = "Groups", values = c("orange2", "seagreen","seagreen", "seagreen", "orange2", "orange2"))+
+          scale_shape_manual(name = "Groups",values = c(17,15,19,13,8,9,10))) #for station names include: obslab = T, obssize = 2
+  
+  #print(ggrda(ASV.clr.rda,group = curl.G, spearrow = NULL, farrow = 0.1, fzoom = 5, ellipse = T, scaling = 2, spe = F)+
+  #        scale_color_manual(name = "Groups",values = c("seagreen", "orange2")) +
+  #        scale_shape_manual(name = "Groups",values = c(16,16)))
+  
   
   #province PERMANOVA
-  ASV.hellinger.t <- t(ASV.hellinger)
+  ASV.ait.t <- t(ASV.ait)
+  
+  
+  #glacier/ no glacier
   
   print(adonis2(
-    formula = ASV.hellinger.t ~ Fjord,
+    formula = ASV.ait.t ~ Glacial.influence,
     data = meta,
-    method = "bray"
+    method = "jaccard"
   ))
   
   
-  dis <- vegdist(ASV.hellinger.t, method = "bray")
+  dis <- vegdist(ASV.ait.t, method = "jaccard")
+  mod <- betadisper(dis, meta$Glacial.influence)
+  
+  print(mod)
+  
+  
+  #region
+  
+  print(adonis2(
+    formula = ASV.ait.t ~ Region,
+    data = meta,
+    method = "jaccard"
+  ))
+  
+  
+  dis <- vegdist(ASV.ait.t, method = "jaccard")
+  mod <- betadisper(dis, meta$Region)
+  
+  print(mod)
+  
+  #fjords
+  
+  print(adonis2(
+    formula = ASV.ait.t ~ Fjord,
+    data = meta,
+    method = "jaccard"
+  ))
+  
+  
+  dis <- vegdist(ASV.ait.t, method = "jaccard")
   mod <- betadisper(dis, meta$Fjord)
   
   print(mod)
+  
+  #Sill
+  
+  print(adonis2(
+    formula = ASV.ait.t ~ Sill,
+    data = meta,
+    method = "jaccard"
+  ))
   
   #clean up!
   detach("package:vegan", unload=TRUE)
