@@ -1,18 +1,18 @@
 ##prokaryotes
 
 #replace below detection with actual number
-meta_16S$PO4..Âµmol.l. <- gsub("<LOQ","0.001", meta_16S$PO4..Âµmol.l.)
-meta_16S$Si..Âµmol.l. <- gsub("<LOQ","0.001", meta_16S$Si..Âµmol.l.)
+meta_16S$PO4_umol.l <- gsub("<LOQ","0.001", meta_16S$PO4_umol.l)
+meta_16S$Si_umol.l <- gsub("<LOQ","0.001", meta_16S$Si_umol.l)
 
-meta_16S$PO4..Âµmol.l. <- as.numeric(meta_16S$PO4..Âµmol.l.)
-meta_16S$Si..Âµmol.l. <- as.numeric(meta_16S$Si..Âµmol.l.)
+meta_16S$PO4_umol.l. <- as.numeric(meta_16S$PO4_umol.l)
+meta_16S$Si_umol.l <- as.numeric(meta_16S$Si_umol.l)
 
 
 #remove NAs and reduce to relevant metadata
 
 metadata_16S <- c("Site", "Station", "Region", "Fjord","In.Out", "Sill", "Latitude", "Longitude", "Date", "Time",
-                  "temperature...C.", "salinity..psu.","O.conc..Âµmol.l.", "Fluorometer",
-                  "PO4..Âµmol.l.", "Si..Âµmol.l.", "NO3..Âµmol.l.",
+                  "temperature...C.", "salinity..psu.","O2umol.l", "Fluorometer",
+                  "PO4_umol.l", "Si_umol.l", "NO3_umol.l",
                   "Glacial.influence", "Current_flow", "Current_score")
 
 meta_16S_nNA <-meta_16S[metadata_16S]%>% 
@@ -23,18 +23,18 @@ meta_16S_nNA <-meta_16S[metadata_16S]%>%
 ##eukaryotes
 
 #replace below detection with actual number
-meta_18S_r$PO4..Âµmol.l. <- gsub("<LOQ","0.001", meta_18S_r$PO4..Âµmol.l.)
-meta_18S_r$Si..Âµmol.l. <- gsub("<LOQ","0.001", meta_18S_r$Si..Âµmol.l.)
+meta_18S_r$PO4_umol.l <- gsub("<LOQ","0.001", meta_18S_r$PO4_umol.l)
+meta_18S_r$Si_umol.l <- gsub("<LOQ","0.001", meta_18S_r$Si_umol.l)
 
-meta_18S_r$PO4..Âµmol.l. <- as.numeric(meta_18S_r$PO4..Âµmol.l.)
-meta_18S_r$Si..Âµmol.l. <- as.numeric(meta_18S_r$Si..Âµmol.l.)
+meta_18S_r$PO4_umol.l <- as.numeric(meta_18S_r$PO4_umol.l)
+meta_18S_r$Si_umol.l <- as.numeric(meta_18S_r$Si_umol.l)
 
 
 #remove NAs and reduce to relevant metadata
 
 metadata_18S <- c("Site","Station", "Region", "Fjord","In.Out", "Sill", "Latitude", "Longitude", "Date", "Time",
-                  "Temperature...C.", "Salinity..psu.","O.conc..Âµmol.l.", "Fluorometer",
-                  "PO4..Âµmol.l.", "Si..Âµmol.l.", "NO3..Âµmol.l.",
+                  "Temperature...C.", "Salinity..psu.","O2umol.l", "Fluorometer",
+                  "PO4_umol.l", "Si_umol.l", "NO3_umol.l",
                   "Glacial.influence", "Current_flow", "Current_score")
 
 meta_18S_nNA <-meta_18S_r[metadata_18S]%>% 
