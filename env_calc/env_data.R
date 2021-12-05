@@ -4,7 +4,7 @@
 meta_all_glacier <- list_meta$meta_all%>%dplyr::filter(Glacial.influence == "Yes")
 meta_all_Nglacier <- list_meta$meta_all%>%dplyr::filter(Glacial.influence == "No")
 
-box_plot_H <- ggplot(data = list_meta$meta_all, aes(x= Region, y=NO3..µmol.l.)) + 
+box_plot_H <- ggplot(data = list_meta$meta_all, aes(x= Region, y=NO3_umol.l)) + 
   geom_point() + 
   geom_boxplot()
 
@@ -12,7 +12,7 @@ print(box_plot_H)
 
 
 box_plot_G <- ggplot(data = list_meta$meta_all, 
-                     aes(x= Region, y=PO4..µmol.l.)) +
+                     aes(x= Region, y=PO4_umol.l)) +
   geom_point() +
   geom_boxplot()
 
@@ -21,7 +21,7 @@ print(box_plot_G)
 
 
 box_plot_J <- ggplot(data = list_meta$meta_all, 
-                     aes(x= Region, y=Si..µmol.l.)) +
+                     aes(x= Region, y=Si_umol.l)) +
   geom_point()+
   geom_boxplot()
 
@@ -38,10 +38,10 @@ print(list_meta$meta_all%>%filter(Glacial.influence == 'No')%>%
 
 
 #meta_all$Glacial.influence <- as.factor(meta_all$Glacial.influence)
-aov_meta <- aov(temperature...C. + salinity..psu. + O.conc..µmol.l. + Fluorometer + PO4..µmol.l. + NO3..µmol.l. + Si..µmol.l. ~ Glacial.influence, list_meta$meta_all)
+aov_meta <- aov(temperature...C. + salinity..psu. + O2umol.l + Fluorometer + PO4_umol.l + NO3_umol.l + Si_umol.l ~ Glacial.influence, list_meta$meta_all)
 print(summary(aov_meta))
 
-aov_meta <- aov(PO4..µmol.l. + NO3..µmol.l. + Si..µmol.l. ~ Glacial.influence, list_meta$meta_all)
+aov_meta <- aov(PO4_umol.l + NO3_umol.l + Si_umol.l ~ Glacial.influence, list_meta$meta_all)
 print(summary(aov_meta))
 
 #F-test to compare variance
@@ -52,15 +52,15 @@ res
 res <- var.test(salinity..psu. ~ Glacial.influence, data = list_meta$meta_all)
 res
 
-res <- var.test(O.conc..µmol.l. ~ Glacial.influence, data = list_meta$meta_all)
+res <- var.test(O2umol.l ~ Glacial.influence, data = list_meta$meta_all)
 res
 
 
 t.test(temperature...C. ~ Glacial.influence, data = list_meta$meta_all) #***
 t.test(salinity..psu. ~ Glacial.influence, data = list_meta$meta_all)
 t.test(Fluorometer ~ Glacial.influence, data = list_meta$meta_all)
-t.test(PO4..µmol.l. ~ Glacial.influence, data = list_meta$meta_all) #***
-t.test(NO3..µmol.l. ~ Glacial.influence, data = list_meta$meta_all) #**
+t.test(PO4_umol.l ~ Glacial.influence, data = list_meta$meta_all) #***
+t.test(NO3_umol.l ~ Glacial.influence, data = list_meta$meta_all) #**
 
 
 

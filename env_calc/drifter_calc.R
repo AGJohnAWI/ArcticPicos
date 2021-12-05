@@ -16,27 +16,15 @@ colnames(drifter_1_month) <- info.sort$Station
 
 #drifter_1_month[drifter_1_month == -999.0000] <- 0
 drifter_1_month_p <- drifter_1_month#1/drifter_1_month[] *(-1)
-drifter_1_month_p <- normalize(drifter_1_month_p, method = "range", range = c(0, 1), margin = 1L, on.constant = "quiet")
 
-
-#drifter_1_month_p <- normalize(drifter_1_month_p, method = "range", range = c(0, 1), margin = 1L, on.constant = "quiet")
-
-#drifter_3_month[drifter_3_month == -999.0000] <- 0
 drifter_3_month_p <- drifter_3_month #1/drifter_3_month[] *(-1)
-drifter_3_month_p <- normalize(drifter_3_month_p, method = "range", range = c(0, 1), margin = 1L, on.constant = "quiet")
-
 
 #drifter_6_month[drifter_6_month == -999.0000] <- 0
 drifter_6_month_p <- drifter_6_month  #1/drifter_6_month[] *(-1)
-drifter_6_month_p <- normalize(drifter_6_month_p, method = "range", range = c(0, 1), margin = 1L, on.constant = "quiet")
 
-#drifter_1year[drifter_1year == -999.0000] <- 0
 drifter_1year_p <-  drifter_1year#1/drifter_1year[] *(-1)
-drifter_1year_p <- normalize(drifter_1year_p, method = "range", range = c(0, 1), margin = 1L, on.constant = "quiet")
 
-#drifter_5year[drifter_5year == -999.0000] <- 0
 drifter_5year_p <- drifter_5year#1/drifter_5year[] *(-1)
-drifter_5year_p <- normalize(drifter_5year_p, method = "range", range = c(0, 1), margin = 1L, on.constant = "quiet")
 
 #4proks
 

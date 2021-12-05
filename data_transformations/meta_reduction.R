@@ -4,7 +4,7 @@
 meta_16S$PO4_umol.l <- gsub("<LOQ","0.001", meta_16S$PO4_umol.l)
 meta_16S$Si_umol.l <- gsub("<LOQ","0.001", meta_16S$Si_umol.l)
 
-meta_16S$PO4_umol.l. <- as.numeric(meta_16S$PO4_umol.l)
+meta_16S$PO4_umol.l <- as.numeric(meta_16S$PO4_umol.l)
 meta_16S$Si_umol.l <- as.numeric(meta_16S$Si_umol.l)
 
 
@@ -41,5 +41,5 @@ meta_18S_nNA <-meta_18S_r[metadata_18S]%>%
   mutate_all(~ifelse(. %in% c("N/A", "null", ""), NA, .)) %>% 
   na.omit()
 
-meta_map_1 <- dplyr::full_join(meta_16S[,c("Station", "Glacial.influence", "Latitude", "Longitude")], meta_18S[,c("Station", "Glacial.influence", "Latitude", "Longitude")])
+meta_map_1 <- dplyr::full_join(meta_16S_nNA[,c("Station", "Glacial.influence", "Latitude", "Longitude")], meta_18S_nNA[,c("Station", "Glacial.influence", "Latitude", "Longitude")])
 meta_map <- meta_map_1
