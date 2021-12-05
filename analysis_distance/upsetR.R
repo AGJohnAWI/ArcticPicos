@@ -43,6 +43,11 @@ ASV_table4 <- prok_G
   OTU_ma2$EGreenland <- as.integer(OTU_ma2$Nordvestfjord)
   OTU_ma2$WGreenland <- as.integer(OTU_ma2$Disco_B)
   
+  set.seed(123)
+  regions1 <- OTU_ma1[,c(13:15)]
+  regions2 <- OTU_ma2[,c(8:10)]
+  regions1 <- regions1%>% filter_all(any_vars(. != 0)) # filter out rows with 0s
+  regions2 <- regions2%>% filter_all(any_vars(. != 0)) # filter out rows with 0s
   
   
   m1= make_comb_mat(regions1)
@@ -94,5 +99,6 @@ ASV_table4 <- prok_G
 
   rm(prok_G, prok_NG, euk_G, euk_NG)  
   rm(list = ls(pattern="OTU_"))
+  rm(list = ls(pattern="regions"))
   
   
