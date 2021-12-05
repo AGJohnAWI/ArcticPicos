@@ -25,6 +25,8 @@ require(UpSetR)
 ```{r import_data, echo=TRUE, warning=FALSE}
 source("C:/Users/choerstm/Documents/Arctic_Picos/Code/data_import/import.R", encoding = "UTF-8")
 
+source("C:/Users/choerstm/Documents/Arctic_Picos/Code/data_import/rename_metadata.R", encoding = "UTF-8")
+
 ```
 
 # remove replicates and outliers
@@ -69,13 +71,13 @@ source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/drifter_ca
 
 list_drifter <- sapply(ls(pattern="drifter_"), function(x) get(x), simplify = FALSE)
 rm(list = ls(pattern="drifter_"))
-rm(info, info.sort)
+rm(info)
 ```
 
 
 # metadata removing NAs and z-scoring 
 ```{r z_score, echo=FALSE, warning = FALSE}
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/z_scoring.R", encoding = "UTF-8")
+source("C:/Users/choerstm/Documents/Arctic_Picos/Code/meta_reduction.R", encoding = "UTF-8")
 ```
 
 ## metadata exploration
@@ -126,7 +128,7 @@ eval(parse("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/env_da
 ```{r alpha_div, echo=TRUE, fig.width=7,fig.height=3.5, fig.show="hold", out.width="50%"}
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/alpha_diversity.R")
 
-#the following is very intense comuting so better to not run it too often
+#the following is very intense computing so better to not run it too often
 euk_r_alpha <- diversity_iNEXT(euk_r)
 prok_alpha <- diversity_iNEXT(prokaryotes)
 
@@ -167,117 +169,11 @@ rm(list = ls(pattern="_alpha"))
 
 
 ```{r z_scoring}
-#z-scoring
-
-metadata_16S.z <- c("Site", "Station", "Region", "Fjord","In.Out", "Sill","Latitude", "Longitude", "Date", "Time", "temperature...C.", "salinity..psu.", "O.conc..µmol.l.", "Fluorometer", "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.",
-"Glacial.influence", "MLD", "bottom_depth", "Current_flow", "Current_score", "altitude", "azimuth")
-
-z_score_16S <- c("temperature...C.", "salinity..psu.","O.conc..µmol.l.", "Fluorometer", "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "MLD", "bottom_depth", "altitude", "azimuth")
-
-
-meta_16S_nNA.z <- list_meta$meta_16S_m
-
-meta_16S_nNA.z <-meta_16S_nNA.z[metadata_16S.z]%>% 
-  mutate_all(~ifelse(. %in% c("N/A", "null", ""), NA, .)) %>% 
-  na.omit()
-
-
-meta_16S_nNA.z[z_score_16S] <- lapply(meta_16S_nNA.z[z_score_16S], function(x) {y <-scale(x, center = TRUE, scale = TRUE)})
-
-#z-scoring
-
-z_score_18S <- c("Temperature...C.", "Salinity..psu.","O.conc..µmol.l.", "Fluorometer", "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "MLD", "bottom_depth", "altitude", "azimuth")
-
-metadata_18S.z <- c("Site","Station", "Region", "Fjord","In.Out","Sill", "Latitude", "Longitude", "Date", "Time", "Temperature...C.", "Salinity..psu.", "O.conc..µmol.l.", "Fluorometer", "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.",
-"Glacial.influence", "MLD", "bottom_depth", "Current_flow", "Current_score", "altitude", "azimuth")
-
-meta_18S_nNA.z <- list_meta$meta_18S_m
-
-meta_18S_nNA.z <-meta_18S_nNA.z[metadata_18S.z]%>% 
-  mutate_all(~ifelse(. %in% c("N/A", "null", ""), NA, .)) %>% 
-  na.omit()
-
-
-
-meta_18S_nNA.z[z_score_18S] <- lapply(meta_18S_nNA.z[z_score_18S], function(x) {y <-scale(x, center = TRUE, scale = TRUE)})
-
-
-meta_all.z <- list_meta$meta_all
-meta_all.z$Fjord
-
-meta_all_fjord <- meta_all.z%>%group_by(Fjord)%>% 
-        #tally()%>%
-        summarise(mean_temp = mean(temperature...C., na.rm = TRUE), 
-                  mean_sal = mean(salinity..psu., na.rm = TRUE),
-                  mean_Fluo = mean(Fluorometer, na.rm = TRUE),
-                  mean_PO4 = mean(PO4..µmol.l., na.rm = TRUE),
-                  mean_NO3 = mean(NO3..µmol.l., na.rm = TRUE),
-                  mean_Si = mean(Si..µmol.l., na.rm = TRUE),
-                  mean_MLD = mean(MLD, na.rm = TRUE),
-                  mean_bottomD = mean(bottom_depth, na.rm = TRUE)
-                  )
-meta_all_fjord_n <- inner_join(meta_all_fjord, meta_all.z[,c(3,4)], by = "Fjord")
-
-meta_all_fjord <- meta_all_fjord_n[!duplicated(meta_all_fjord_n),]
-
-meta_all.z[z_score_16S] <- lapply(meta_all.z[z_score_16S], function(x) {y <-scale(x, center = TRUE, scale = TRUE)})
-
+source("C:/Users/choerstm/Documents/Arctic_Picos/Code/z_scoring.R")
 ```
-
-
-##cluster analysis metadata
-
-```{r env_cluster, echo=T, warning=F, fig.width=6,fig.height=4}
-require(dendextend)
-
-meta_all.z <- meta_all.z %>%
-  mutate(Region_color = case_when(
-    Region == "Iceland" ~ "#A64995", 
-    Region == "East.Greenland" ~ "#BDD014",
-    Region == "West.Greenland" ~ "#442D87", 
-    Region == "North.Norway" ~ "#2B62FC",
-    Region == "South.Norway" ~ "#A331A0", 
-    Region == "Svalbard" ~ "#720E34"
-    ))
-
-meta_all_fjord <- meta_all_fjord %>%
-  mutate(Region_color = case_when(
-    Region == "Iceland" ~ "#A64995", 
-    Region == "East.Greenland" ~ "#BDD014",
-    Region == "West.Greenland" ~ "#442D87", 
-    Region == "North.Norway" ~ "#2B62FC",
-    Region == "South.Norway" ~ "#A331A0", 
-    Region == "Svalbard" ~ "#720E34"
-    ))
-
-meta_all.z <- meta_all.z %>%
-  mutate(Glacier_color = case_when(
-    Glacial.influence == "No" ~ "seagreen", 
-    Glacial.influence == "Yes" ~ "orange2",
-    ))
-
-
-
-dist_meta<- c("temperature...C.", "salinity..psu.", "Fluorometer",
-                   "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "MLD", "bottom_depth")
-dist_mean_meta<- c("mean_temp" , "mean_sal", "mean_Fluo" , "mean_PO4", "mean_NO3", "mean_Si", "mean_MLD", "mean_bottomD")
-
-meta_fjord.z <- meta_all_fjord
-meta_fjord.z[dist_mean_meta] <- lapply(meta_fjord.z[dist_mean_meta], function(x) {y<-scale(x, center = TRUE, scale = TRUE)})
-
-dist_mat <- vegan::vegdist(meta_fjord.z[dist_mean_meta], method = 'euclidean')
-dend <- hclust(dist_mat, method = 'average') %>% as.dendrogram
-
-labels(dend) <- meta_all_fjord$Fjord
-labels_colors(dend) <- meta_all_fjord$Region_color
-
-plot(dend)
-```
-
-
 
 alpha diversity boxplots
-```{r div_boxplots, fig.width=6,fig.height=4}
+```{r div_boxplots, fig.width=6,fig.height=4, out.width="50%"}
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/boxplot_alphadiv.R")
 ```
 
@@ -297,10 +193,6 @@ taxonomy_16S_clr <- taxonomy_16S%>%filter(rownames %in% rownames(prok_clr))
 taxonomy_16S_clr$ASV <- taxonomy_16S_clr$rownames
 
 ```
-```{r top10_taxa}
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/top_10_fjord.R")
-
-```
 
 *subsample those fjords where comparison between tip mouth / glacier influence is doable*
 
@@ -311,14 +203,14 @@ prok_ait_df <- as.data.frame(as.matrix(prok_aitchinson))
 ```
 
 RDA
-```{r RDA, echo=FALSE, warning=FALSE, fig.width=6,fig.height=4}
+```{r RDA, echo=FALSE, warning=FALSE, fig.width=6,fig.height=4, out.width="50%"}
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/RDA_plots.R")
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/RDA_ordistep.R")
 
 ## prokaryotes
 
 RDA_input_16S <- c("Site","temperature...C.", "salinity..psu.", "Fluorometer",
-                   "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "MLD", "bottom_depth", "altitude", "azimuth")
+                   "PO4_umol.l", "Si_umol.l", "NO3_umol.l", "MLD", "bottom_depth", "altitude", "azimuth")
 
 prok_nNA <- prokaryotes%>%dplyr::select(meta_16S_nNA.z$Site)
 prok_clr_nNA <- prok_clr%>%dplyr::select(meta_16S_nNA.z$Site)
@@ -334,14 +226,14 @@ ordi(prok_clr_nNA, meta_16S_nNA.z[RDA_input_16S])
 #RDA plot
 
 meta_sig <- c("temperature...C.", "salinity..psu.", "Fluorometer",
-                   "PO4..µmol.l.", "NO3..µmol.l.", "bottom_depth", "altitude")
+                   "PO4_umol.l", "NO3_umol.l", "bottom_depth", "altitude")
 
 RDA_plots(meta_16S_nNA.z, prok_clr_nNA, prok_ait_nNA)
 
 ## eukaryotes
 
 RDA_input_18S <- c("Site","Temperature...C.", "Salinity..psu.", "Fluorometer",
-                   "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "MLD", "bottom_depth", "altitude", "azimuth")
+                   "PO4_umol.l", "Si_umol.l", "NO3_umol.l", "MLD", "bottom_depth", "altitude", "azimuth")
 
 
 
@@ -356,7 +248,7 @@ ordi(euk_clr_nNA, meta_18S_nNA.z[RDA_input_18S])
 #ordistep function confirms that all variables contribute significantly
 
 meta_sig <- c("Temperature...C.", "Salinity..psu.", "Fluorometer",
-                   "PO4..µmol.l.", "Si..µmol.l.", "NO3..µmol.l.", "bottom_depth", "altitude")
+                   "PO4_umol.l", "Si_umol.l", "NO3_umol.l", "bottom_depth", "altitude")
 
 #RDA plot
 
@@ -367,30 +259,27 @@ RDA_plots(meta_18S_nNA.z, euk_clr_nNA, euk_ait_nNA)
 
 #distance analysis
 
-```{r distance, echo=FALSE, warning=FALSE, fig.width=6,fig.height=4}
+```{r distance, echo=FALSE, warning=FALSE, fig.width=6,fig.height=4, out.width="33%"}
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/distance_analyses.R")
 
-distance_calc_prok(prok_r, info.sort, drifter_1m_prok, list_meta$meta_16S)
-distance_calc_prok(prok_r, info.sort, drifter_3m_prok, list_meta$meta_16S)
-distance_calc_prok(prok_r, info.sort, drifter_6m_prok, list_meta$meta_16S)
-distance_calc_prok(prok_r, info.sort, drifter_1y_prok, list_meta$meta_16S)
-distance_calc_prok(prok_r, info.sort, drifter_5y_prok, list_meta$meta_16S)
+distance_calc_prok(prok_r, info.sort, list_drifter$drifter_1m_prok, list_meta$meta_16S)
+distance_calc_prok(prok_r, info.sort, list_drifter$drifter_3m_prok, list_meta$meta_16S)
+distance_calc_prok(prok_r, info.sort, list_drifter$drifter_6m_prok, list_meta$meta_16S)
+distance_calc_prok(prok_r, info.sort, list_drifter$drifter_1y_prok, list_meta$meta_16S)
+distance_calc_prok(prok_r, info.sort, list_drifter$drifter_5y_prok, list_meta$meta_16S)
 
-distance_calc_euk(euk_r, info.sort, drifter_1m_euk, list_meta$meta_18S)
-distance_calc_euk(euk_r, info.sort, drifter_3m_euk,list_meta$meta_18S)
-distance_calc_euk(euk_r, info.sort, drifter_6m_euk,list_meta$meta_18S)
-distance_calc_euk(euk_r, info.sort, drifter_1y_euk,list_meta$meta_18S)
-distance_calc_euk(euk_r, info.sort, drifter_5y_euk,list_meta$meta_18S)
+distance_calc_euk(euk_r, info.sort, list_drifter$drifter_1m_euk, list_meta$meta_18S)
+distance_calc_euk(euk_r, info.sort, list_drifter$drifter_3m_euk,list_meta$meta_18S)
+distance_calc_euk(euk_r, info.sort, list_drifter$drifter_6m_euk,list_meta$meta_18S)
+distance_calc_euk(euk_r, info.sort, list_drifter$drifter_1y_euk,list_meta$meta_18S)
+distance_calc_euk(euk_r, info.sort, list_drifter$drifter_5y_euk,list_meta$meta_18S)
 
 
 ```
 
-#top10 most abundant (clr-transformed) taxa of glacier and no glacier regions
+```{r upsetR_plot, warning=FALSE, fig.width=6,fig.height=4, out.width="50%"}
 
-```{r}
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/top_10_glacier.R")
-```
-```{r upsetR_plot}
+source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/top_10_fjord.R")
 source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/upsetR.R")
 ```
 
