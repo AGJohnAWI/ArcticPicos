@@ -92,15 +92,30 @@ all
                              normBetw = FALSE,
                              normClose = FALSE,
                              normEigen = FALSE)
-  
+  #aa <-net_season[["simMat1"]]
+  #max(aa[aa != max(aa)])
   summary(props_season)
+
+  # Get phyla names from the taxonomic table created before
+  phyla <- as.factor(taxtab[, "Tax_1"])
+  names(phyla) <- taxtab[, "Tax_6"]
+  #table(phyla)
+  
+  # Define phylum colors
+  phylcol <- c("#23378d", "#ae1816", "#d49dc7")
+  
   
   plot(props_season, 
        sameLayout = FALSE, 
-       nodeColor = "cluster",
-       nodeSize = "mclr",
+       nodeColor = "feature", #alternative here: "cluster"
+       featVecCol = phyla, 
+       colorVec =  phylcol,
+       nodeSize = "clr",
        shortenLabels = "none",
+       rmSingles = TRUE,
        labelScale = FALSE,
+       posCol = "darkgreen", 
+       negCol = "darkgrey",
        cexNodes = 0.7, 
        cexLabels = 0.5,
        cexHubLabels = 0.7,
