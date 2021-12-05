@@ -65,9 +65,7 @@ rm(outliers_euks, rep_16S, rep_18S)
 import the distance tables of drifters
 
 ```{r drifter_model, echo=TRUE, warning=FALSE}
-#source("C:/Users/choerstm/Documents/Arctic_Picos/Code/env_calc/drifter_calc.R", encoding = #"UTF-8")
-
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/drifter_calc.R")
+source("C:/Users/choerstm/Documents/Arctic_Picos/Code/env_calc/drifter_calc.R", encoding = "UTF-8")
 
 list_drifter <- sapply(ls(pattern="drifter_"), function(x) get(x), simplify = FALSE)
 rm(list = ls(pattern="drifter_"))
@@ -77,25 +75,22 @@ rm(info)
 
 # metadata removing NAs and z-scoring 
 ```{r z_score, echo=FALSE, warning = FALSE}
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/meta_reduction.R", encoding = "UTF-8")
+source("C:/Users/choerstm/Documents/Arctic_Picos/Code/env_calc/meta_reduction.R", encoding = "UTF-8")
 ```
 
 ## metadata exploration
 
 ```{r meta, echo=TRUE}
-#source("C:/Users/choerstm/Documents/Arctic_Picos/Code/env_calc/MLD_DK.R", encoding = "UTF-8")
-#source("C:/Users/choerstm/Documents/Arctic_Picos/Code/env_calc/MLD_calculations.R", encoding = "UTF-8")
+source("C:/Users/choerstm/Documents/Arctic_Picos/Code/env_calc/MLD_DK.R", encoding = "UTF-8")
+source("C:/Users/choerstm/Documents/Arctic_Picos/Code/env_calc/MLD_calculations.R", encoding = "UTF-8")
 
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/MLD_DK.R", encoding = "UTF-8")
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/MLD_calculations.R", encoding = "UTF-8")
 ```
 
 
 add seasonality (based on sun altitude and azimuth) to the analysis 
 
 ```{r suncalc, echo=FALSE}
-#source("C:/Users/choerstm/Documents/Arctic_Picos/Code/env_calc/SunAngleCalc.R", encoding = "UTF-8")
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/SunAngleCalc.R", encoding = "UTF-8")
+source("C:/Users/choerstm/Documents/Arctic_Picos/Code/env_calc/SunAngleCalc.R", encoding = "UTF-8")
 meta_sun2_16S <- Sunanglecalc(meta_16S_m)
 meta_sun2_18S <- Sunanglecalc(meta_18S_m)
 
@@ -119,14 +114,14 @@ rm(list = ls(pattern="meta_"))
 
 
 ```{r env_data, echo=FALSE, warning = FALSE, fig.width=6,fig.height=4, fig.show="hold", out.width="50%"}
-eval(parse("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/env_data.R", encoding = "UTF-8"))
+eval(parse("C:/Users/choerstm/Documents/Arctic_Picos/Code/env_calc/env_data.R", encoding = "UTF-8"))
 
 ```
 
 
 
 ```{r alpha_div, echo=TRUE, fig.width=7,fig.height=3.5, fig.show="hold", out.width="50%"}
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/alpha_diversity.R")
+source("C:/Users/choerstm/Documents/Arctic_Picos/Code/alpha_div/alpha_diversity.R")
 
 #the following is very intense computing so better to not run it too often
 euk_r_alpha <- diversity_iNEXT(euk_r)
@@ -169,17 +164,17 @@ rm(list = ls(pattern="_alpha"))
 
 
 ```{r z_scoring}
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/z_scoring.R")
+source("C:/Users/choerstm/Documents/Arctic_Picos/Code/data_transformations/z_scoring.R")
 ```
 
 alpha diversity boxplots
 ```{r div_boxplots, fig.width=6,fig.height=4, out.width="50%"}
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/boxplot_alphadiv.R")
+source("C:/Users/choerstm/Documents/Arctic_Picos/Code/alpha_div/boxplot_alphadiv.R")
 ```
 
 ## data transformations
 ```{r transformations, echo=TRUE, warning=FALSE}
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/transformation_CLR_aitchinson.R")
+source("C:/Users/choerstm/Documents/Arctic_Picos/Code/data_transformations/transformation_CLR_aitchinson.R")
 
 euk_aitchinson <- dczm(euk_r, 1)
 prok_aitchinson <- dczm(prokaryotes, 1)
@@ -204,8 +199,8 @@ prok_ait_df <- as.data.frame(as.matrix(prok_aitchinson))
 
 RDA
 ```{r RDA, echo=FALSE, warning=FALSE, fig.width=6,fig.height=4, out.width="50%"}
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/RDA_plots.R")
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/RDA_ordistep.R")
+source("C:/Users/choerstm/Documents/Arctic_Picos/Code/analysis_multivariate/RDA_plots.R")
+source("C:/Users/choerstm/Documents/Arctic_Picos/Code/analysis_multivariate/RDA_ordistep.R")
 
 ## prokaryotes
 
@@ -260,7 +255,7 @@ RDA_plots(meta_18S_nNA.z, euk_clr_nNA, euk_ait_nNA)
 #distance analysis
 
 ```{r distance, echo=FALSE, warning=FALSE, fig.width=6,fig.height=4, out.width="33%"}
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/distance_analyses.R")
+source("C:/Users/choerstm/Documents/Arctic_Picos/Code/analysis_distance/distance_analyses.R")
 
 distance_calc_prok(prok_r, info.sort, list_drifter$drifter_1m_prok, list_meta$meta_16S)
 distance_calc_prok(prok_r, info.sort, list_drifter$drifter_3m_prok, list_meta$meta_16S)
@@ -279,8 +274,8 @@ distance_calc_euk(euk_r, info.sort, list_drifter$drifter_5y_euk,list_meta$meta_1
 
 ```{r upsetR_plot, warning=FALSE, fig.width=6,fig.height=4, out.width="50%"}
 
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/top_10_fjord.R")
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/upsetR.R")
+source("C:/Users/choerstm/Documents/Arctic_Picos/Code/analysis_distance/top_10_fjord.R")
+source("C:/Users/choerstm/Documents/Arctic_Picos/Code/analysis_distance/upsetR.R")
 ```
 
 
@@ -341,7 +336,7 @@ taxonomy_merged_clr$Tax_5[is.na(taxonomy_merged_clr$Tax_5)] <- "g__"
 
 network analysis with both 16S and 18S
 ```{r network_analysis_all, echo=FALSE, warning=FALSE, fig.width=6,fig.height=4}
-source("C:/Users/choerstm/Documents/Studenten/arctic_picos/Submission/network_netCoMi_all.R")
+source("C:/Users/choerstm/Documents/Arctic_Picos/Code/analysis_network/network_netCoMi_all.R")
 
 ```
 
