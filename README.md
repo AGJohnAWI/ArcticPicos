@@ -1,5 +1,10 @@
 # ArcticPicos
 
+
+current release (v1.0.0): 
+[![DOI](https://zenodo.org/badge/340082844.svg)](https://zenodo.org/badge/latestdoi/340082844)
+
+
 **microbial community analyses of arctic fjords**
 
 community analyses of arctic fjords
