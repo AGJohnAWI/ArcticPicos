@@ -4,19 +4,19 @@
 
 community analyses of arctic fjords
 
-### all import files can be found under: 
+**all import files can be found under:** 
 
 data_import
 
-### data transformations are compiled in the folder
+**data transformations are compiled in the folder:**
 
 data_transformations
 
-### alpha diversity calculations (Hill numbers) are under:
+**alpha diversity calculations (Hill numbers) are under:**
 
 alpha_div
 
-### data analysis is divided into multiple folders 
+**data analysis is divided into multiple folders** 
 
 analysis_multivariate #this folder contains the RDA analysis 
 
