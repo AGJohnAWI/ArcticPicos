@@ -11,21 +11,21 @@ Try executing this chunk by clicking the *Run* button within the chunk or by pla
 
 ```{r packages, echo=TRUE, warning=FALSE}
 require(iNEXT)
-require(tidyverse)
+require(tidyverse); packageVersion("tidyverse")
 require(tidyr) 
 require(dplyr)
 require(ggplot2)
 require(vegan)
 require(tibble) #for "rownames_to_column('Site')" 
-require(reshape2)
+require(reshape2); packageVersion("reshape2")
 require(UpSetR)
 
 ```
 
 ```{r import_data, echo=TRUE, warning=FALSE}
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/data_import/import.R", encoding = "UTF-8")
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/data_import/import.R", encoding = "UTF-8")
 
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/data_import/rename_metadata.R", encoding = "UTF-8")
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/data_import/rename_metadata.R", encoding = "UTF-8")
 
 ```
 
@@ -65,7 +65,7 @@ rm(outliers_euks, rep_16S, rep_18S)
 import the distance tables of drifters
 
 ```{r drifter_model, echo=TRUE, warning=FALSE}
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/env_calc/drifter_calc.R", encoding = "UTF-8")
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/env_calc/drifter_calc.R", encoding = "UTF-8")
 
 list_drifter <- sapply(ls(pattern="drifter_"), function(x) get(x), simplify = FALSE)
 rm(list = ls(pattern="drifter_"))
@@ -75,14 +75,14 @@ rm(info)
 
 # metadata removing NAs and z-scoring 
 ```{r z_score, echo=FALSE, warning = FALSE}
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/env_calc/meta_reduction.R", encoding = "UTF-8")
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/env_calc/meta_reduction.R", encoding = "UTF-8")
 ```
 
 ## metadata exploration
 
 ```{r meta, echo=TRUE}
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/env_calc/MLD_DK.R", encoding = "UTF-8")
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/env_calc/MLD_calculations.R", encoding = "UTF-8")
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/env_calc/MLD_DK.R", encoding = "UTF-8")
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/env_calc/MLD_calculations.R", encoding = "UTF-8")
 
 ```
 
@@ -90,7 +90,7 @@ source("C:/Users/choerstm/Documents/Arctic_Picos/Code/env_calc/MLD_calculations.
 add seasonality (based on sun altitude and azimuth) to the analysis 
 
 ```{r suncalc, echo=FALSE}
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/env_calc/SunAngleCalc.R", encoding = "UTF-8")
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/env_calc/SunAngleCalc.R", encoding = "UTF-8")
 meta_sun2_16S <- Sunanglecalc(meta_16S_m)
 meta_sun2_18S <- Sunanglecalc(meta_18S_m)
 
@@ -114,14 +114,14 @@ rm(list = ls(pattern="meta_"))
 
 
 ```{r env_data, echo=FALSE, warning = FALSE, fig.width=6,fig.height=4, fig.show="hold", out.width="50%"}
-eval(parse("C:/Users/choerstm/Documents/Arctic_Picos/Code/env_calc/env_data.R", encoding = "UTF-8"))
-
+eval(parse("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/env_calc/env_data.R", encoding = "UTF-8"))
+list_meta$meta_all%>%group_by(Region)%>%summarize(n())
 ```
 
 
 
 ```{r alpha_div, echo=TRUE, fig.width=7,fig.height=3.5, fig.show="hold", out.width="50%"}
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/alpha_div/alpha_diversity.R")
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/alpha_div/alpha_diversity.R")
 
 #the following is very intense computing so better to not run it too often
 euk_r_alpha <- diversity_iNEXT(euk_r)
@@ -147,7 +147,7 @@ prok_alpha_n$Pielou.prok <- prok_alpha_n$Shannon.prok/log(prok_alpha_n$Richness.
 
 euk_r_alpha_meta_l <- euk_r_alpha_n%>%gather(Div_indices, Div_value, Richness.euk, Shannon.euk, Simpson.euk, Pielou.euk)
 prok_alpha_meta_l <- prok_alpha_n%>%gather(Div_indices, Div_value, Richness.prok, Shannon.prok, Simpson.prok, Pielou.prok)
-div_sub <- c("Station", "Glacial.influence","In.Out", "Div_indices", "Div_value")
+div_sub <- c("Station", "Glacial.influence","In.Out","Bioclimatic_subzone", "Div_indices", "Div_value")
 
 
 #REF 4 pielou: https://www.davidzeleny.net/anadat-r/doku.php/en:div-ind
@@ -157,6 +157,7 @@ div_sub <- c("Station", "Glacial.influence","In.Out", "Div_indices", "Div_value"
 div_alpha_both <- full_join(euk_r_alpha_meta_l[,div_sub], prok_alpha_meta_l[,div_sub])
 
 list_div <- sapply(ls(pattern="_alpha"), function(x) get(x), simplify = FALSE)
+
 rm(list = ls(pattern="_alpha"))
 
 ```
@@ -164,17 +165,17 @@ rm(list = ls(pattern="_alpha"))
 
 
 ```{r z_scoring}
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/data_transformations/z_scoring.R")
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/data_transformations/z_scoring.R")
 ```
 
 alpha diversity boxplots
 ```{r div_boxplots, fig.width=6,fig.height=4, out.width="50%"}
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/alpha_div/boxplot_alphadiv.R")
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/alpha_div/boxplot_alphadiv.R")
 ```
 
 ## data transformations
 ```{r transformations, echo=TRUE, warning=FALSE}
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/data_transformations/transformation_CLR_aitchinson.R")
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/data_transformations/transformation_CLR_aitchinson.R")
 
 euk_aitchinson <- dczm(euk_r, 1)
 prok_aitchinson <- dczm(prokaryotes, 1)
@@ -189,6 +190,40 @@ taxonomy_16S_clr$ASV <- taxonomy_16S_clr$rownames
 
 ```
 
+```{r CLR plots}
+
+#extract ASVs in Bioclimatic regions
+Arctic_euk <- list_meta$meta_18S_nNA%>%filter(Bioclimatic_subzone == c("high_arctic", "low_arctic"))
+Arctic_euk_clr <- euk_clr%>%dplyr::select(Arctic_euk$Site)
+#replace minimum from each column with NA
+
+#AEMIN <- Arctic_euk_clr %>% 
+#  mutate_all(~ replace(.x, which.max(.x<0), NA))
+
+#maxnegative = function(x) max(x[x < 0])
+discard <- apply(Arctic_euk_clr, 2, function(x) max(x[x < 0]))
+discard <- as.data.frame(t(discard))
+
+Arctic_euk_clr$X12.HE492_S6[Arctic_euk_clr$X12.HE492_S6 == discard$X12.HE492_S6] <- NA
+
+for (i in colnames(Arctic_euk_clr)) { 
+  value <- discard[[i]]
+  Arctic_euk_clr[[i]][Arctic_euk_clr[[i]] == value] <- NA
+}
+
+
+#bring into long format
+Arctic_euk_clr_long <- gather(AEMIN, Station, value)
+
+#plot
+ggplot(Arctic_euk_clr_long, aes(x = reorder(rownames(Arctic_euk_clr_long), -value), y = value))+
+  geom_bar(stat = 'identity')
+  #geom_bar(stat = 'identity')
+
+
+```
+
+
 *subsample those fjords where comparison between tip mouth / glacier influence is doable*
 
 ```{r ait_dataframe, echo=FALSE, warning=FALSE}
@@ -199,8 +234,12 @@ prok_ait_df <- as.data.frame(as.matrix(prok_aitchinson))
 
 RDA
 ```{r RDA, echo=FALSE, warning=FALSE, fig.width=6,fig.height=4, out.width="50%"}
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/analysis_multivariate/RDA_plots.R")
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/analysis_multivariate/RDA_ordistep.R")
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_multivariate/RDA_plots.R")
+
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_multivariate/RDA_plots_v2.R")
+
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_multivariate/RDA_ordistep.R")
+
 
 ## prokaryotes
 
@@ -220,10 +259,14 @@ ordi(prok_clr_nNA, meta_16S_nNA.z[RDA_input_16S])
 
 #RDA plot
 
-meta_sig <- c("temperature...C.", "salinity..psu.", "Fluorometer",
+meta_sig <- c("temperature...C.", "salinity..psu.",
                    "PO4_umol.l", "NO3_umol.l", "bottom_depth", "altitude")
 
 RDA_plots(meta_16S_nNA.z, prok_clr_nNA, prok_ait_nNA)
+
+#Plot against temperature gradient to show the beta diversity change
+
+#RDA_plots_v2(meta_16S_nNA.z, prok_clr_nNA, prok_ait_nNA)
 
 ## eukaryotes
 
@@ -244,18 +287,18 @@ ordi(euk_clr_nNA, meta_18S_nNA.z[RDA_input_18S])
 
 meta_sig <- c("Temperature...C.", "Salinity..psu.", "Fluorometer",
                    "PO4_umol.l", "Si_umol.l", "NO3_umol.l", "bottom_depth", "altitude")
-
+meta_18S_nNA.z$temperature...C. <- meta_18S_nNA.z$Temperature...C.
 #RDA plot
 
 RDA_plots(meta_18S_nNA.z, euk_clr_nNA, euk_ait_nNA)
-
+#RDA_plots_v2(meta_18S_nNA.z, euk_clr_nNA, euk_ait_nNA)
 ```
 
 
 #distance analysis
 
 ```{r distance, echo=FALSE, warning=FALSE, fig.width=6,fig.height=4, out.width="33%"}
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/analysis_distance/distance_analyses.R")
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_distance/distance_analyses.R")
 
 distance_calc_prok(prok_r, info.sort, list_drifter$drifter_1m_prok, list_meta$meta_16S)
 distance_calc_prok(prok_r, info.sort, list_drifter$drifter_3m_prok, list_meta$meta_16S)
@@ -270,12 +313,17 @@ distance_calc_euk(euk_r, info.sort, list_drifter$drifter_1y_euk,list_meta$meta_1
 distance_calc_euk(euk_r, info.sort, list_drifter$drifter_5y_euk,list_meta$meta_18S)
 
 
+##diversity against temperature gradients
+
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_distance/Temperature_distance.R")
+
 ```
 
 ```{r upsetR_plot, warning=FALSE, fig.width=6,fig.height=4, out.width="50%"}
 
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/analysis_distance/top_10_fjord.R")
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/analysis_distance/upsetR.R")
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_distance/top_10_fjord.R")
+
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_distance/upsetR.R")
 ```
 
 
