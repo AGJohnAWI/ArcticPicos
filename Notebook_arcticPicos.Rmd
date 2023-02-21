@@ -204,20 +204,19 @@ Arctic_euk_clr <- euk_clr%>%dplyr::select(Arctic_euk$Site)
 discard <- apply(Arctic_euk_clr, 2, function(x) max(x[x < 0]))
 discard <- as.data.frame(t(discard))
 
-Arctic_euk_clr$X12.HE492_S6[Arctic_euk_clr$X12.HE492_S6 == discard$X12.HE492_S6] <- NA
+#Arctic_euk_clr$X12.HE492_S6[Arctic_euk_clr$X12.HE492_S6 == #discard$X12.HE492_S6] <- NA
 
 for (i in colnames(Arctic_euk_clr)) { 
   value <- discard[[i]]
   Arctic_euk_clr[[i]][Arctic_euk_clr[[i]] == value] <- NA
 }
 
-
 #bring into long format
-Arctic_euk_clr_long <- gather(AEMIN, Station, value)
+Arctic_euk_clr_long <- gather(Arctic_euk_clr, Station, value)
 
 #plot
 ggplot(Arctic_euk_clr_long, aes(x = reorder(rownames(Arctic_euk_clr_long), -value), y = value))+
-  geom_bar(stat = 'identity')
+  geom_bar(stat = 'identity', color = "#F2A408")
   #geom_bar(stat = 'identity')
 
 
