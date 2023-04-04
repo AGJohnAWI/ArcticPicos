@@ -1,7 +1,7 @@
 #z-scoring
 
-metadata_16S.z <- c("Site", "Station", "Region", "Fjord","In.Out", "Sill","Latitude", "Longitude", "Date", "Time", "temperature...C.", "salinity..psu.", "O2umol.l", "Fluorometer", "PO4_umol.l", "Si_umol.l", "NO3_umol.l",
-                    "Glacial.influence", "MLD", "bottom_depth", "Current_flow", "Current_score", "altitude", "azimuth")
+metadata_16S.z <- c("Site", "Station", "Region", "Fjord","Fjord2","In.Out","Latitude", "Longitude", "Date", "Time", "temperature...C.", "salinity..psu.", "O2umol.l", "Fluorometer", "PO4_umol.l", "Si_umol.l", "NO3_umol.l",
+                    "Glacial.influence", "Bioclimatic_subzone", "MLD", "bottom_depth", "altitude", "azimuth")
 
 z_score_16S <- c("temperature...C.", "salinity..psu.","O2umol.l", "Fluorometer", "PO4_umol.l", "Si_umol.l", "NO3_umol.l", "MLD", "bottom_depth", "altitude", "azimuth")
 
@@ -19,8 +19,8 @@ meta_16S_nNA.z[z_score_16S] <- lapply(meta_16S_nNA.z[z_score_16S], function(x) {
 
 z_score_18S <- c("Temperature...C.", "Salinity..psu.","O2umol.l", "Fluorometer", "PO4_umol.l", "Si_umol.l", "NO3_umol.l", "MLD", "bottom_depth", "altitude", "azimuth")
 
-metadata_18S.z <- c("Site","Station", "Region", "Fjord","In.Out","Sill", "Latitude", "Longitude", "Date", "Time", "Temperature...C.", "Salinity..psu.", "O2umol.l", "Fluorometer", "PO4_umol.l", "Si_umol.l", "NO3_umol.l",
-                    "Glacial.influence", "MLD", "bottom_depth", "Current_flow", "Current_score", "altitude", "azimuth")
+metadata_18S.z <- c("Site","Station", "Region", "Fjord","Fjord2","In.Out", "Latitude", "Longitude", "Date", "Time", "Temperature...C.", "Salinity..psu.", "O2umol.l", "Fluorometer", "PO4_umol.l", "Si_umol.l", "NO3_umol.l",
+                    "Glacial.influence","Bioclimatic_subzone", "MLD", "bottom_depth", "altitude", "azimuth")
 
 meta_18S_nNA.z <- list_meta$meta_18S_m
 

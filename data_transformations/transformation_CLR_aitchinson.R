@@ -10,10 +10,11 @@ clr <- function(abundance.tax, count){
   
   d <- as.data.frame(abundance.tax)
   sum(d == 0) #filter out low abundance ASVs
-  
+  #dd <- subset(d, rowSums(d, na.rm = TRUE) == 0)
   d.1 <- data.frame(d[which(apply(d, 1, function(x){mean(x)}) > count),], 
                     check.names=F) 
-  d.czm <- cmultRepl(t(d.1),  label=0, method="CZM") #CZM is a Bayesian toll for count zeros in compositional datasets. Needs to be done when you want to do a log ratio transformation afterwards cause t cannot deal with 0s.
+  d.czm <- cmultRepl(t(d.1),  label=0, method="CZM", frac= 0.9, adjust=FALSE, z.warning = 0.9) #CZM is a Bayesian toll for count zeros in compositional datasets. Needs to be done when you want to do a log ratio transformation afterwards cause t cannot deal with 0s.
+  #NOTE: fraction changed because 0 observations were above the smallest detected fraction. (default usually 0.65)
   d.clr <- t(apply(d.czm, 1, function(x){log(x) - mean(log(x))})) #centered log ratio transformation
   mi <- t(d.clr)
   d.clrdata <- data.matrix(mi)
@@ -45,7 +46,6 @@ dczm <- function(abundance.tax, count){
                     check.names=F) 
   d.czm <- cmultRepl(t(d.1),  label=0, method="CZM")
   #CZM is a Bayesian toll for count zeros in compositional datasets. Needs to be done when you want to do a log ratio transformation afterwards cause t cannot deal with 0s.
-  
   a <- as.matrix(d.czm)
   names <- rownames(a)
   aitchinson <- coda.base::dist(a, method = 'ait')
