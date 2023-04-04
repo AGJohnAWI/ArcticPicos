@@ -16,10 +16,10 @@ Lyngenfjord <- Lyngenfjord$Site
 Balsfjord <- meta_18S_nNA.z%>%filter(Fjord == "Balsfjord")
 Balsfjord <- Balsfjord$Site
 
-Lofoten.HE431 <- meta_18S_nNA.z%>%filter(Fjord == "Lofoten.HE431")
+Lofoten.HE431 <- meta_18S_nNA.z%>%filter(Fjord2 == "Lofoten.HE431")
 Lofoten.HE431 <- Lofoten.HE431$Site
 
-Lofoten.HE33 <- meta_18S_nNA.z%>%filter(Fjord == "Lofoten.HE33")
+Lofoten.HE33 <- meta_18S_nNA.z%>%filter(Fjord2 == "Lofoten.HE33")
 Lofoten.HE33 <- Lofoten.HE33$Site
 
 Nordfjord <- meta_18S_nNA.z%>%filter(Fjord == "Nordfjord")
@@ -31,7 +31,7 @@ Sognefjord <- Sognefjord$Site
 Boknafjord <- meta_18S_nNA.z%>%filter(Fjord == "Boknafjord")
 Boknafjord <- Boknafjord$Site
 
-OrustT.Fjord <- meta_18S_nNA.z%>%filter(Fjord == "Orust-Tjörn.Fjord")
+OrustT.Fjord <- meta_18S_nNA.z%>%filter(Fjord == "Orust-TjË†rn.Fjord")
 OrustT.Fjord <- OrustT.Fjord$Site
 
 Van.Mijen.Fjord <- meta_18S_nNA.z%>%filter(Fjord == "Van.Mijen.Fjord")
@@ -59,8 +59,8 @@ Disco_B <- meta_18S_nNA.z%>%filter(Fjord == "Disco Bay")
 Disco_B <- Disco_B$Site
 
 
-
 fjord_euk <- euk_r
+#fjord_euk <- as.data.frame(sapply(fjord_euk,as.integer))
 fjord_euk$Tanafjord <- rowSums(fjord_euk[ , Tanafjord], na.rm = TRUE)
 fjord_euk$Laksefjord <- rowSums(fjord_euk[ , Laksefjord], na.rm = TRUE)
 fjord_euk$Porsangerfjord <- rowSums(fjord_euk[ , Porsangerfjord], na.rm = TRUE)
@@ -81,13 +81,15 @@ fjord_euk$Iceland <- rowSums(fjord_euk[ , Iceland], na.rm = TRUE)
 fjord_euk$Nordvestfjord <- rowSums(fjord_euk[ , Nordvestfjord], na.rm = TRUE)
 fjord_euk$Disco_B <- rowSums(fjord_euk[ , Disco_B], na.rm = TRUE)
 
+
 euk_fjord_total <- fjord_euk 
 euk_fjord_clr <- clr(fjord_euk,1)
 euk_fjord_clr_sums <- euk_fjord_clr
 euk_fjord_clr_re <-  euk_fjord_clr%>%dplyr::slice_max(order_by = Porsangerfjord, n = 10)
 #change to the fjord of interest
 
-#euk_No_glacier_top10 <- taxonomy_18S%>%dplyr::filter(rownames(taxonomy_18S) %in% rownames(euk_fjord_clr_re))
+euk_No_glacier_top10 <- taxonomy_18S%>%dplyr::filter(rownames(taxonomy_18S) %in% rownames(euk_fjord_clr_re))
+
 
 
 #prokaryotes
@@ -109,10 +111,10 @@ Lyngenfjord <- Lyngenfjord$Site
 Balsfjord <- meta_16S_nNA.z%>%filter(Fjord == "Balsfjord")
 Balsfjord <- Balsfjord$Site
 
-Lofoten.HE431 <- meta_16S_nNA.z%>%filter(Fjord == "Lofoten.HE431")
+Lofoten.HE431 <- meta_16S_nNA.z%>%filter(Fjord2 == "Lofoten.HE431")
 Lofoten.HE431 <- Lofoten.HE431$Site
 
-Lofoten.HE33 <- meta_16S_nNA.z%>%filter(Fjord == "Lofoten.HE33")
+Lofoten.HE33 <- meta_16S_nNA.z%>%filter(Fjord2 == "Lofoten.HE33")
 Lofoten.HE33 <- Lofoten.HE33$Site
 
 Nordfjord <- meta_16S_nNA.z%>%filter(Fjord == "Nordfjord")
@@ -124,7 +126,7 @@ Sognefjord <- Sognefjord$Site
 Boknafjord <- meta_16S_nNA.z%>%filter(Fjord == "Boknafjord")
 Boknafjord <- Boknafjord$Site
 
-OrustT.Fjord <- meta_16S_nNA.z%>%filter(Fjord == "Orust-Tjörn.Fjord")
+OrustT.Fjord <- meta_16S_nNA.z%>%filter(Fjord == "Orust-TjË†rn.Fjord")
 OrustT.Fjord <- OrustT.Fjord$Site
 
 Van.Mijen.Fjord <- meta_16S_nNA.z%>%filter(Fjord == "Van.Mijen.Fjord")
@@ -180,6 +182,6 @@ prok_fjord_clr <- clr(fjord_prok,1)
 prok_fjord_clr_re <-  prok_fjord_clr%>%dplyr::slice_max(order_by = Nordvestfjord, n = 10)
 #change to the fjord of interest
 
-#p_top10 <- taxonomy_16S%>%dplyr::filter(rownames(taxonomy_16S) %in% rownames(prok_fjord_clr_re))
+p_top10 <- taxonomy_16S%>%dplyr::filter(rownames(taxonomy_16S) %in% rownames(prok_fjord_clr_re))
 
 

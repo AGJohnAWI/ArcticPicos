@@ -10,14 +10,14 @@ distance_calc_prok <- function(prok_r, info.sort, drifter_matrix, meta){
 prok_drifter <- prok_r%>%dplyr::select(info.sort$Site_prok)
 ait_dist_16S_drifter <- dczm(prok_drifter, 1)
 
-ait_dist_vector <- dist2list(ait_dist_16S_drifter, tri = TRUE)
+ait_dist_vector <- metagMisc::dist2list(ait_dist_16S_drifter, tri = TRUE)
 ait_dist_vector$col <- ait_dist_vector$col
 ait_dist_vector$row <- ait_dist_vector$row
 
 
 #normalize the drifter matrix
 
-drifter_matrix_p <- 1/drifter_matrix[]*(-1)
+drifter_matrix_p <- 1/drifter_matrix[] #*(-1)
 
 #take information from both directions of the connectivity matrix
 
@@ -33,20 +33,23 @@ all_16S <- inner_join(all_16S, drift_long2, by = c('col', 'row'))
 all_16S$value.y <- as.numeric(all_16S$value.y)
 all_16S$total_particle <- all_16S$value.y + all_16S$value
 
+
+#remove those sites that are not connected
+all_16S_c <- all_16S %>%dplyr::filter(!total_particle > -0.003)
+
 #normalize the particle concentration
-
-all_16S$particle_normalized <- normalize(all_16S$total_particle, method = "range", range = c(0, 1), margin = 1L, on.constant = "quiet")
-
+all_16S_c$particle_normalized <- normalize(all_16S_c$total_particle, method = "range", range = c(0, 1), margin = 1L, on.constant = "quiet")
+ print(nrow(all_16S_c))
 #all_16S$pmax <- pmax(all_16S$value.y, all_16S$value)
 #all_16S$pmin <- pmin(all_16S$value.y, all_16S$value)
 
 #all_16S_oneDirectional <- all_16S%>%dplyr::filter(!pmin > 0.1)
-all_16S_c <- all_16S %>%dplyr::filter(!particle_normalized == 0)
+
 
 meta$col <- meta$Site
 meta$row <- meta$Site
-all_16S_c <- dplyr::left_join(all_16S_c, meta[,c(4,31)], by = "col")
-all_16S_c <- dplyr::left_join(all_16S_c, meta[,c(4,32)], by = "row")
+all_16S_c <- dplyr::left_join(all_16S_c, meta[,c(4,29)], by = "col") #col
+all_16S_c <- dplyr::left_join(all_16S_c, meta[,c(4,30)], by = "row") #row
 
 all_16S_c <- unite(all_16S_c, var, c(Region2.x, Region2.y), sep = "_")
 
@@ -60,7 +63,7 @@ f <- ggplot(all_16S_c, aes(x = particle_normalized, y = value.x, color =var))+
 
 print(f)
 
-g <- ggplot(all_16S_c, aes(x = particle_normalized, y = value.x))+
+g <- ggplot(all_16S_c, aes(x = particle_normalized, y = value.x), color = "black")+
   geom_smooth(aes(y=value.x, x=particle_normalized), method='lm') +
   geom_point()+
   scale_y_continuous(name="Aitchinson distance", limits=c(0, 150))+ 
@@ -68,15 +71,24 @@ g <- ggplot(all_16S_c, aes(x = particle_normalized, y = value.x))+
 
 print(g)
 
-##with 0
-
-h <- ggplot(all_16S, aes(x = particle_normalized, y = value.x))+
+h <- ggplot(all_16S_c, aes(x = particle_normalized, y = value.x))+
   geom_smooth(aes(y=value.x, x=particle_normalized), method='lm') +
   geom_point()+
   scale_y_continuous(name="Aitchinson distance", limits=c(0, 150))+ 
   scale_x_continuous(name="oceanographic conncetivity", limits=c(0, 1))
 
 print(h)
+
+
+##with 0
+
+#h <- ggplot(all_16S, aes(x = particle_normalized, y = value.x))+
+#  geom_smooth(aes(y=value.x, x=particle_normalized), method='lm') +
+#  geom_point()+
+#  scale_y_continuous(name="Aitchinson distance", limits=c(0, 150))+ 
+#  scale_x_continuous(name="oceanographic conncetivity", limits=c(0, 1))
+
+#print(h)
 
 print(cor.test(all_16S_c$particle_normalized, all_16S_c$value.x,  method = "pearson"))
 a <-lm(particle_normalized ~ value.x, data = all_16S_c)
@@ -100,7 +112,7 @@ distance_calc_euk <- function(euk_r, info.sort, drifter_matrix, meta){
   
   #normalize the drifter matrix
   
-  drifter_matrix_p <- 1/drifter_matrix[]*(-1)
+  drifter_matrix_p <- 1/drifter_matrix[] #*(-1)
   
   #take information from both directions of the connectivity matrix
   
@@ -118,18 +130,18 @@ distance_calc_euk <- function(euk_r, info.sort, drifter_matrix, meta){
   
   #normalize the particle concentration
   
-  all_16S$particle_normalized <- normalize(all_16S$total_particle, method = "range", range = c(0, 1), margin = 1L, on.constant = "quiet")
+  #remove those sites that are not connected
+  all_16S_c <- all_16S %>%dplyr::filter(!total_particle > -0.003)
   
-  #all_16S$pmax <- pmax(all_16S$value.y, all_16S$value)
-  #all_16S$pmin <- pmin(all_16S$value.y, all_16S$value)
+  #normalize the particle concentration
+  all_16S_c$particle_normalized <- normalize(all_16S_c$total_particle, method = "range", range = c(0, 1), margin = 1L, on.constant = "quiet")
   
-  #all_16S_oneDirectional <- all_16S%>%dplyr::filter(!pmin > 0.1)
-  all_16S_c <- all_16S %>%dplyr::filter(!particle_normalized == 0)
+  print(nrow(all_16S_c))
   
   meta$col <- meta$Site
   meta$row <- meta$Site
-  all_16S_c <- dplyr::left_join(all_16S_c, meta[,c(4,30)], by = "col")
-  all_16S_c <- dplyr::left_join(all_16S_c, meta[,c(4,31)], by = "row")
+  all_16S_c <- dplyr::left_join(all_16S_c, meta[,c(4,28)], by = "col")
+  all_16S_c <- dplyr::left_join(all_16S_c, meta[,c(4,29)], by = "row")
   
   all_16S_c <- unite(all_16S_c, var, c(Region2.x, Region2.y), sep = "_")
   
@@ -138,12 +150,12 @@ distance_calc_euk <- function(euk_r, info.sort, drifter_matrix, meta){
   f <- ggplot(all_16S_c, aes(x = particle_normalized, y = value.x, color =var))+
     geom_point()+
     scale_y_continuous(name="Aitchinson distance", limits=c(0, 150))+ 
-    scale_x_continuous(name="oceanographic conncetivity", limits=c(0, 1))
+    scale_x_continuous(name="oceanographic distance", limits=c(0, 1))
   #geom_point() 
   
   print(f)
   
-  g <- ggplot(all_16S_c, aes(x = particle_normalized, y = value.x))+
+  g <- ggplot(all_16S_c, aes(x = particle_normalized, y = value.x), color = "black")+
     geom_smooth(aes(y=value.x, x=particle_normalized), method='lm') +
     geom_point()+
     scale_y_continuous(name="Aitchinson distance", limits=c(0, 150))+ 
@@ -153,13 +165,13 @@ distance_calc_euk <- function(euk_r, info.sort, drifter_matrix, meta){
   
   ##with 0
   
-  h <- ggplot(all_16S, aes(x = particle_normalized, y = value.x))+
-    geom_smooth(aes(y=value.x, x=particle_normalized), method='lm') +
-    geom_point()+
-    scale_y_continuous(name="Aitchinson distance", limits=c(0, 150))+ 
-    scale_x_continuous(name="oceanographic conncetivity", limits=c(0, 1))
+#  h <- ggplot(all_16S, aes(x = particle_normalized, y = value.x))+
+#    geom_smooth(aes(y=value.x, x=particle_normalized), method='lm') +
+#    geom_point()+
+#    scale_y_continuous(name="Aitchinson distance", limits=c(0, 150))+ 
+#    scale_x_continuous(name="oceanographic distance", limits=c(0, 1))
   
-  print(h)
+#  print(h)
   
   print(cor.test(all_16S_c$particle_normalized, all_16S_c$value.x,  method = "pearson"))
   a <-lm(particle_normalized ~ value.x, data = all_16S_c)
