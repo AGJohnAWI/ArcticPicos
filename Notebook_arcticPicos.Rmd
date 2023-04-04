@@ -190,37 +190,6 @@ taxonomy_16S_clr$ASV <- taxonomy_16S_clr$rownames
 
 ```
 
-```{r CLR plots}
-
-#extract ASVs in Bioclimatic regions
-Arctic_euk <- list_meta$meta_18S_nNA%>%filter(Bioclimatic_subzone == c("high_arctic", "low_arctic"))
-Arctic_euk_clr <- euk_clr%>%dplyr::select(Arctic_euk$Site)
-#replace minimum from each column with NA
-
-#AEMIN <- Arctic_euk_clr %>% 
-#  mutate_all(~ replace(.x, which.max(.x<0), NA))
-
-#maxnegative = function(x) max(x[x < 0])
-discard <- apply(Arctic_euk_clr, 2, function(x) max(x[x < 0]))
-discard <- as.data.frame(t(discard))
-
-#Arctic_euk_clr$X12.HE492_S6[Arctic_euk_clr$X12.HE492_S6 == #discard$X12.HE492_S6] <- NA
-
-for (i in colnames(Arctic_euk_clr)) { 
-  value <- discard[[i]]
-  Arctic_euk_clr[[i]][Arctic_euk_clr[[i]] == value] <- NA
-}
-
-#bring into long format
-Arctic_euk_clr_long <- gather(Arctic_euk_clr, Station, value)
-
-#plot
-ggplot(Arctic_euk_clr_long, aes(x = reorder(rownames(Arctic_euk_clr_long), -value), y = value))+
-  geom_bar(stat = 'identity', color = "#F2A408")
-  #geom_bar(stat = 'identity')
-
-
-```
 
 
 *subsample those fjords where comparison between tip mouth / glacier influence is doable*
@@ -380,11 +349,8 @@ taxonomy_merged_clr$Tax_5[is.na(taxonomy_merged_clr$Tax_5)] <- "g__"
 ```
 
 
-
-network analysis with both 16S and 18S
-```{r network_analysis_all, echo=FALSE, warning=FALSE, fig.width=6,fig.height=4}
-source("C:/Users/choerstm/Documents/Arctic_Picos/Code/analysis_network/network_netCoMi_all.R")
-
+```{r trophic groups}
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_network/top_abundant.R")
 ```
 
 
