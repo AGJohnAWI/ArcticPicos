@@ -16,7 +16,7 @@ diversity_iNEXT<-function(abundance){
     dplyr::rename(Richness = `Species richness`)%>%
     dplyr::rename(Shannon = `Shannon diversity`)%>%
     dplyr::rename(Simpson = `Simpson diversity`)
-  iNEXT_diversity_observed$Site <- as.character(iNEXT_diversity_observed$Site)
+  iNEXT_diversity_observed$Site <- as.character(iNEXT_diversity_observed$Assemblage)
   
   iNEXT_diversity_observed <- as_tibble(iNEXT_diversity_observed)
   
