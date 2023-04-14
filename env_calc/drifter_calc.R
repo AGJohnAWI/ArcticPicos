@@ -1,15 +1,15 @@
 
 require(BBmisc)
-info <- read.csv("C:/Users/choerstm/Documents/Studenten/arctic_picos/a4_tracmass2/info_table_drifter.csv", sep = ";")
+info <- read.csv("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Datasets/a4_tracmass2/info_table_drifter.csv", sep = ";")
 
 #sort according to the number
 info.sort <- with(info, info[order(info$no),])
 
-drifter_1_month <- read.csv("C:/Users/choerstm/Documents/Studenten/arctic_picos/a4_tracmass2/a4_fwd_cora_cm_day_31.csv", head = F)
-drifter_3_month <- read.csv("C:/Users/choerstm/Documents/Studenten/arctic_picos/a4_tracmass2/a4_fwd_cora_cm_day_91.csv", head = F)
-drifter_6_month <- read.csv("C:/Users/choerstm/Documents/Studenten/arctic_picos/a4_tracmass2/a4_fwd_cora_cm_day_181.csv", head = F)
-drifter_1year <- read.csv("C:/Users/choerstm/Documents/Studenten/arctic_picos/a4_tracmass2/a4_fwd_cora_cm_day_361.csv", head = F)
-drifter_5year <- read.csv("C:/Users/choerstm/Documents/Studenten/arctic_picos/a4_tracmass2/a4_fwd_cora_cm_day_1821.csv", head = F)
+drifter_1_month <- read.csv("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Datasets/a4_tracmass2/a4_fwd_cora_cm_day_31.csv", head = F)
+drifter_3_month <- read.csv("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Datasets/a4_tracmass2/a4_fwd_cora_cm_day_91.csv", head = F)
+drifter_6_month <- read.csv("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Datasets/a4_tracmass2/a4_fwd_cora_cm_day_181.csv", head = F)
+drifter_1year <- read.csv("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Datasets/a4_tracmass2/a4_fwd_cora_cm_day_361.csv", head = F)
+drifter_5year <- read.csv("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Datasets/a4_tracmass2/a4_fwd_cora_cm_day_1821.csv", head = F)
 
 rownames(drifter_1_month) <- info.sort$Station
 colnames(drifter_1_month) <- info.sort$Station

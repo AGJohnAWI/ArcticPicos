@@ -1,9 +1,9 @@
 #MLD calculations
-cTD_HE533 <- read.csv("C:/Users/choerstm/Documents/Studenten/arctic_picos/CTD/HE533_CTD.txt", sep = "\t",  encoding = "UTF-8", stringsAsFactors=FALSE)
-CTD_HE492 <- read.csv("C:/Users/choerstm/Documents/Studenten/arctic_picos/CTD/HE492_CTD.txt", sep = "\t",  encoding = "UTF-8", stringsAsFactors=FALSE)
-CTD_HE431 <- read.csv("C:/Users/choerstm/Documents/Studenten/arctic_picos/CTD/HE431_CTD.txt", sep = "\t",  encoding = "UTF-8", stringsAsFactors=FALSE)
-CTD_MSM56 <- read.csv("C:/Users/choerstm/Documents/Studenten/arctic_picos/CTD/MSM56_CTD.txt", sep = "\t",  encoding = "UTF-8", stringsAsFactors=FALSE)
-CTD_MSM21 <- read.csv("C:/Users/choerstm/Documents/Studenten/arctic_picos/CTD/MSM21_CTD.txt", sep = "\t",  encoding = "UTF-8", stringsAsFactors=FALSE)
+cTD_HE533 <- read.csv("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Datasets/CTD/HE533_CTD.csv", sep = ",",  encoding = "UTF-8", stringsAsFactors=FALSE)
+CTD_HE492 <- read.csv("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Datasets/CTD/HE492_CTD.csv", sep = ",",  encoding = "UTF-8", stringsAsFactors=FALSE)
+CTD_HE431 <- read.csv("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Datasets/CTD/HE431_CTD.csv", sep = ",",  encoding = "UTF-8", stringsAsFactors=FALSE)
+CTD_MSM56 <- read.csv("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Datasets/CTD/MSM56_CTD.csv", sep = ",",  encoding = "UTF-8", stringsAsFactors=FALSE)
+CTD_MSM21 <- read.csv("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Datasets/CTD/MSM21_CTD.csv", sep = ",",  encoding = "UTF-8", stringsAsFactors=FALSE)
 #HE533_1 <- cTD_HE533%>%group_split(Event)
 
 HE533 <- dplyr::inner_join(meta_map_1, cTD_HE533, by = c("Latitude", "Longitude"))
@@ -32,14 +32,14 @@ HE431_MLD_s <- HE431_MLD[!(HE431_MLD$Event == "HE431/28-1"|HE431_MLD$Event == "H
 CTD_MSM21$Station <- gsub("/3_", ".F02.", CTD_MSM21$Event)
 CTD_MSM21$Station <- gsub("-.*", "", CTD_MSM21$Station)
 MSM21 <- dplyr::inner_join(meta_map_1, CTD_MSM21, by = "Station")
-MSM21$Temp....C. <- MSM21$Temp...C...ITS.90..Sensor.1..CTD..SEA.BI....
+MSM21$Temp....C. = MSM21$Temp....C...ITS.90..Sensor.1..CTD..SEA.BI....
 MSM21_MLD <- MSM21%>%group_by(Event)%>%
   summarise(MLD = MLD_DK(depth = Depth.water..m., variable = Temp....C., threshold = 0.5, 
                          print.info = F, plot = F, depth.max = 1000), bottom_depth = max(Elevation..m.),
             Latitude = mean(Latitude.x), Longitude = mean(Longitude.x))
 
 MSM56 <- dplyr::inner_join(meta_map_1, CTD_MSM56, by = c("Latitude", "Longitude"))
-MSM56$Temp....C. <- MSM56$Temp...C...Sensor.1..ITS.90..CTD..SEA.BI....
+MSM56$Temp....C. = MSM56$Temp....C...Sensor.1..ITS.90..CTD..SEA.BI....
 MSM56_MLD <- MSM56%>%group_by(Event)%>%
   summarise(MLD = MLD_DK(depth = Depth.water..m., variable = Temp....C., threshold = 0.5, 
                          print.info = F, plot = F, depth.max = 1000), bottom_depth = max(Elevation..m.),

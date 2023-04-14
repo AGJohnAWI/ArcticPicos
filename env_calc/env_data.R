@@ -1,9 +1,19 @@
 
-#subset metadata with and without marine-terminating glaciers
+## check for normal distribution
+require(ggplot2)
+library(rcompanion)
 
-meta_all_glacier <- list_meta$meta_all%>%dplyr::filter(Glacial.influence == "Yes")
-meta_all_Nglacier <- list_meta$meta_all%>%dplyr::filter(Glacial.influence == "No")
 
+plotNormalHistogram(list_meta$meta_all$NO3_umol.l,  main = "NO3")
+plotNormalHistogram(list_meta$meta_all$PO4_umol.l,  main = "PO4")
+plotNormalHistogram(list_meta$meta_all$Si_umol.l,  main = "Si")
+plotNormalHistogram(list_meta$meta_all$temperature...C.,  main = "temperature")
+plotNormalHistogram(list_meta$meta_all$salinity..psu.,  main = "salinity")
+plotNormalHistogram(list_meta$meta_all$O2umol.l,  main = "oxygen")
+plotNormalHistogram(list_meta$meta_all$Fluorometer,  main = "fluorescence")
+
+
+## boxplots
 box_plot_H <- ggplot(data = list_meta$meta_all, aes(x= Region, y=NO3_umol.l)) + 
   geom_point() + 
   geom_boxplot()
@@ -27,42 +37,10 @@ box_plot_J <- ggplot(data = list_meta$meta_all,
 
 print(box_plot_J)
 
-# check the temperature range
-
-print(list_meta$meta_all%>%filter(Glacial.influence == 'No')%>%
-  summarise(mean = mean(temperature...C.), min = min(temperature...C.), max = max(temperature...C.), n = n()))
-
-#glacier: n = 32, no glacier n = 90
-
-
 
 
 #meta_all$Glacial.influence <- as.factor(meta_all$Glacial.influence)
-aov_meta <- aov(temperature...C. + salinity..psu. + O2umol.l + Fluorometer + PO4_umol.l + NO3_umol.l + Si_umol.l ~ Glacial.influence, list_meta$meta_all)
-print(summary(aov_meta))
-
-aov_meta <- aov(PO4_umol.l + NO3_umol.l + Si_umol.l ~ Glacial.influence, list_meta$meta_all)
-print(summary(aov_meta))
-
-#F-test to compare variance
-
-res <- var.test(temperature...C. ~ Glacial.influence, data = list_meta$meta_all)
-res
-
-res <- var.test(salinity..psu. ~ Glacial.influence, data = list_meta$meta_all)
-res
-
-res <- var.test(O2umol.l ~ Glacial.influence, data = list_meta$meta_all)
-res
-
-
-t.test(temperature...C. ~ Glacial.influence, data = list_meta$meta_all) #***
-t.test(salinity..psu. ~ Glacial.influence, data = list_meta$meta_all)
-t.test(Fluorometer ~ Glacial.influence, data = list_meta$meta_all)
-t.test(PO4_umol.l ~ Glacial.influence, data = list_meta$meta_all) #***
-t.test(NO3_umol.l ~ Glacial.influence, data = list_meta$meta_all) #**
-
-
+print(kruskal.test(temperature...C. + salinity..psu. + O2umol.l + Fluorometer + PO4_umol.l + NO3_umol.l + Si_umol.l ~ Bioclimatic_subzone, list_meta$meta_all))
 
 
 ## T-S plot
