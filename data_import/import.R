@@ -1,12 +1,12 @@
 
-setwd("C:/Users/choerstm/Documents/Studenten/arctic_picos/")
+setwd("/Users/corahoerstmann/Documents/AWI_ArcticFjords/")
 
 #eukaryotes
 
-eukaryotes <- read.csv("./arctic_picos_18S_final_merge.csv", sep = ";", row.names = 1, header = T, stringsAsFactors = FALSE)
-meta_18S <- read.csv("./Submission/meta_18s_arcticpicos.csv", sep = ";", header = T)
-taxonomy_18S <- read.csv("./Submission/arcticPicos18S_taxonomy.csv", sep = ";", row.names = 1)
-translation <- read.csv("./arcticPicos18S_translation.txt", sep = "\t")
+eukaryotes <- read.csv("./Datasets/arctic_picos_18S_final_merge.csv", sep = ";", row.names = 1, header = T, stringsAsFactors = FALSE)
+meta_18S <- read.csv("./Datasets/meta_18s_arcticpicos.csv", sep = ",", header = T)
+taxonomy_18S <- read.csv("./Datasets/arcticPicos18S_taxonomy.csv", sep = ";", row.names = 1)
+translation <- read.csv("./Datasets/arcticPicos18S_translation.txt", sep = "\t")
 #asta file 4 taxonomy
 
 taxonomy_18S$ASV <- row.names(taxonomy_18S)
@@ -49,9 +49,9 @@ rownames(taxonomy_18S) <- taxonomy_18S$ASV
 #eukaryotes <- eukaryotes%>%dplyr::filter(rownames(eukaryotes) %in% taxonomy_18S$X)
 
 #prokaryotes
-prokaryotes <- read.csv("./numeric_cleaned_prokaryotes_ASV1-X.csv", sep = ";", row.names = 1, stringsAsFactors = FALSE)
-meta_16S <- read.csv("./Submission/meta_16s_arcticpicos.csv", sep = ";", header = T)
-taxonomy_16S <- read.csv("./Submission/silvaNGS_taxonomy.csv", sep = ";", row.names = 1)
+prokaryotes <- read.csv("./Datasets/numeric_cleaned_prokaryotes_ASV1-X.csv", sep = ";", row.names = 1, stringsAsFactors = FALSE)
+meta_16S <- read.csv("./Datasets/meta_16s_arcticpicos.csv", sep = ",", header = T)
+taxonomy_16S <- read.csv("./Datasets/silvaNGS_taxonomy.csv", sep = ";", row.names = 1)
 
 prokaryotes <- prokaryotes%>%dplyr::select(meta_16S$Site)
 
@@ -85,3 +85,4 @@ prokaryotes <- prokaryotes%>%dplyr::filter(rownames(prokaryotes) %in% taxonomy_1
 prokaryotes <- prokaryotes[rowSums(prokaryotes)>0,]
 
 taxonomy_16S <- taxonomy_16S%>%dplyr::filter(rownames %in% rownames(prokaryotes)) 
+
