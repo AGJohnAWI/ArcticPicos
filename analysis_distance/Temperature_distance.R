@@ -64,7 +64,7 @@ PROKARYOTES_TEMP <- Temp_distance_all_x
 SETA <- PROKARYOTES_TEMP%>%filter(Bioclimatic_subzone.x == c("temperate", "subarctic"))
 SETA <- SETA%>%filter(Bioclimatic_subzone.y == c("temperate", "subarctic"))
 fitA <- lm(V1 ~ value, data = SETA)
-summary(fitA)
+print(summary(fitA))
 p_setA <- ggplot(SETA, aes(x=V1, y=value)) +
   geom_point()+
   xlim(0, 17)+
@@ -79,7 +79,7 @@ print(p_setA)
 SETB <- PROKARYOTES_TEMP%>%filter(Bioclimatic_subzone.x == c("subarctic", "low_arctic"))
 SETB <- SETB%>%filter(Bioclimatic_subzone.y == c("subarctic", "low_arctic"))
 fitB <- lm(V1 ~ value, data = SETB)
-summary(fitB)
+print(summary(fitB))
 p_setB <- ggplot(SETB, aes(x=V1, y=value)) +
   geom_point()+
   xlim(0, 17)+
@@ -94,7 +94,7 @@ SETC <- PROKARYOTES_TEMP%>%filter(Bioclimatic_subzone.x == c("low_arctic", "high
 SETC <- SETC%>%filter(Bioclimatic_subzone.y == c("low_arctic", "high_arctic"))
 
 fitC <- lm(V1 ~ value, data = SETC)
-summary(fitC)
+print(summary(fitC))
 p_setC <- ggplot(SETC, aes(x=V1, y=value)) +
   geom_point()+
   stat_smooth(method = "lm", col = "red")+
@@ -163,7 +163,7 @@ EUKARYOTES_TEMP <- left_join(EUKARYOTES_TEMP, meta_euk_mod[,c(27,29)], by = "row
 SETA <- EUKARYOTES_TEMP%>%filter(Bioclimatic_subzone.x == c("temperate", "subarctic"))
 SETA <- SETA%>%filter(Bioclimatic_subzone.y == c("temperate", "subarctic"))
 fitA <- lm(V1 ~ value, data = SETA)
-summary(fitA)
+print(summary(fitA))
 p_setA <- ggplot(SETA, aes(x=V1, y=value)) +
   geom_point()+
   xlim(0, 17)+
@@ -178,7 +178,7 @@ print(p_setA)
 SETB <- EUKARYOTES_TEMP%>%filter(Bioclimatic_subzone.x == c("subarctic", "low_arctic"))
 SETB <- SETB%>%filter(Bioclimatic_subzone.y == c("subarctic", "low_arctic"))
 fitB <- lm(V1 ~ value, data = SETB)
-summary(fitB)
+print(summary(fitB))
 p_setB <- ggplot(SETB, aes(x=V1, y=value)) +
   geom_point()+
   xlim(0, 17)+
@@ -193,7 +193,7 @@ SETC <- EUKARYOTES_TEMP%>%filter(Bioclimatic_subzone.x == c("low_arctic", "high_
 SETC <- SETC%>%filter(Bioclimatic_subzone.y == c("low_arctic", "high_arctic"))
 
 fitC <- lm(V1 ~ value, data = SETC)
-summary(fitC)
+print(summary(fitC))
 p_setC <- ggplot(SETC, aes(x=V1, y=value)) +
   geom_point()+
   stat_smooth(method = "lm", col = "red")+
