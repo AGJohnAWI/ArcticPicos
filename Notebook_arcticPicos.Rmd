@@ -10,16 +10,14 @@ This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute
 Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
 
 ```{r packages, echo=TRUE, warning=FALSE}
-require(iNEXT)
+require(iNEXT); packageVersion("iNEXT")
 require(tidyverse); packageVersion("tidyverse")
-require(tidyr) 
-require(dplyr)
-require(ggplot2)
-require(vegan)
+require(tidyr); packageVersion("tidyr")
+require(dplyr); packageVersion("dplyr")
+require(ggplot2); packageVersion("ggplot2")
+require(vegan); packageVersion("vegan")
 require(tibble) #for "rownames_to_column('Site')" 
 require(reshape2); packageVersion("reshape2")
-require(UpSetR)
-
 ```
 
 ```{r import_data, echo=TRUE, warning=FALSE}
@@ -29,7 +27,7 @@ source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/data_import/rename
 
 ```
 
-# remove replicates and outliers
+### remove replicates and outliers
 
 outliers arose from crysochromulina bloom (John et al. in prep) and replicates only available from HE533, thus we always used Rep. A from each site.
 
@@ -73,7 +71,7 @@ rm(info)
 ```
 
 
-# metadata removing NAs and z-scoring 
+### metadata removing NAs and z-scoring 
 ```{r z_score, echo=FALSE, warning = FALSE}
 source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/env_calc/meta_reduction.R", encoding = "UTF-8")
 ```
@@ -94,6 +92,9 @@ source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/env_calc/SunAngleC
 meta_sun2_16S <- Sunanglecalc(meta_16S_m)
 meta_sun2_18S <- Sunanglecalc(meta_18S_m)
 
+meta_sun2_16S%>%group_by(Fjord2)%>%summarise(min_alt = min(altitude), max_alt = max(altitude), min_az = min(azimuth), max_az = max(azimuth))
+meta_sun2_18S%>%group_by(Fjord2)%>%summarise(min_alt = min(altitude), max_alt = max(altitude), min_az = min(azimuth), max_az = max(azimuth))
+
 meta_16S_m <- dplyr::inner_join(meta_16S_m, meta_sun2_16S[,c("Site","altitude", "azimuth")], by = c("Site"))
 
 meta_18S_m <- dplyr::inner_join(meta_18S_m, meta_sun2_18S[,c("Site","altitude", "azimuth")], by = c("Site"))
@@ -107,6 +108,8 @@ create list of metadata
 
 meta_all <- dplyr::inner_join(meta_16S_m, meta_18S_nNA[1:2], by="Station")
 meta_all$In.Out <- as.factor(meta_all$In.Out)
+
+meta_all%>%group_by(Fjord2)%>%summarise(min_depth = min(bottom_depth), max_depth = max(bottom_depth))
 
 list_meta <- sapply(ls(pattern="meta_"), function(x) get(x), simplify = FALSE)
 rm(list = ls(pattern="meta_"))
@@ -158,6 +161,11 @@ div_alpha_both <- full_join(euk_r_alpha_meta_l[,div_sub], prok_alpha_meta_l[,div
 
 list_div <- sapply(ls(pattern="_alpha"), function(x) get(x), simplify = FALSE)
 
+
+std <- function(x) sd(x)/sqrt(length(x))
+
+list_div$div_alpha_both%>%filter(Div_indices == "Richness.euk")%>%group_by(Bioclimatic_subzone)%>%summarise(median = median(Div_value),min = min(Div_value), max = max(Div_value), std = std(Div_value), n=n())
+list_div$div_alpha_both%>%filter(Div_indices == "Richness.prok")%>%group_by(Bioclimatic_subzone)%>%summarise(median = median(Div_value),min = min(Div_value), max = max(Div_value), std = std(Div_value), n=n())
 rm(list = ls(pattern="_alpha"))
 
 ```
@@ -190,17 +198,15 @@ taxonomy_16S_clr$ASV <- taxonomy_16S_clr$rownames
 
 ```
 
-
-
-*subsample those fjords where comparison between tip mouth / glacier influence is doable*
-
 ```{r ait_dataframe, echo=FALSE, warning=FALSE}
 euk_ait_df <- as.data.frame(as.matrix(euk_aitchinson))
 prok_ait_df <- as.data.frame(as.matrix(prok_aitchinson))
 #prok_ait_r_df <- as.data.frame(as.matrix(prok_aitchinson_r))
 ```
 
-RDA
+## multivariate analysis
+
+**RDA**
 ```{r RDA, echo=FALSE, warning=FALSE, fig.width=6,fig.height=4, out.width="50%"}
 source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_multivariate/RDA_plots.R")
 
@@ -263,7 +269,7 @@ RDA_plots(meta_18S_nNA.z, euk_clr_nNA, euk_ait_nNA)
 ```
 
 
-#distance analysis
+## distance analysis
 
 ```{r distance, echo=FALSE, warning=FALSE, fig.width=6,fig.height=4, out.width="33%"}
 source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_distance/distance_analyses.R")
@@ -287,17 +293,7 @@ source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_distance/
 
 ```
 
-```{r upsetR_plot, warning=FALSE, fig.width=6,fig.height=4, out.width="50%"}
-
-source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_distance/top_10_fjord.R")
-
-source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_distance/upsetR.R")
-```
-
-
-#Network analyses
-
-https://doi.org/10.1093/bib/bbaa290
+## functional co-analysis of prokaryotes and picoeukaryotes and their trophic groups
 
 ```{r network_analysis_1, echo=FALSE, warning=FALSE}
 #concatenate the ASV tables after clr transformation
