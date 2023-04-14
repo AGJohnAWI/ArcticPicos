@@ -24,8 +24,11 @@ RDA_plots <- function(meta, ASV.clr, ASV.ait){
   gr2 <- meta.wf$Fjord
   curl.n <- factor(gr2)
   
-  gr3 <- meta.wf$Glacial.influence
+  gr3 <- meta.wf$Bioclimatic_subzone
   curl.G <- factor(gr3)
+  
+  gr4 <- meta.wf$Glacial.influence
+  curl.GN <- factor(gr4)
   #RDA
   ASV.clr.rda <- rda(
     ASV.clr.t.sort ~ .,
@@ -52,8 +55,8 @@ RDA_plots <- function(meta, ASV.clr, ASV.ait){
   
   #par(xpd=TRUE)
   #provinces
-  print(ggrda(ASV.clr.rda, group = grl, spearrow = NULL, farrow = 0.1, fzoom = 5, ellipse = T, scaling = 2, spe = F)+
-          scale_color_manual(name = "Groups", values = c("orange2", "seagreen","seagreen", "seagreen", "orange2", "orange2"))+
+  print(ggords::ggrda(ASV.clr.rda, group = grl, spearrow = NULL, farrow = 0.1, fzoom = 5, ellipse = T, scaling = 2, spe = F)+
+          scale_color_manual(name = "Groups", values = c("orange2", "#6DB72C","#6DB72C", "seagreen", "#F9D606", "orange2"))+
           scale_shape_manual(name = "Groups",values = c(17,15,19,13,8,9,10))) #for station names include: obslab = T, obssize = 2
   
   #print(ggrda(ASV.clr.rda,group = curl.G, spearrow = NULL, farrow = 0.1, fzoom = 5, ellipse = T, scaling = 2, spe = F)+
@@ -65,17 +68,19 @@ RDA_plots <- function(meta, ASV.clr, ASV.ait){
   ASV.ait.t <- t(ASV.ait)
   
   
-  #glacier/ no glacier
+
+  
+  #Bioclimatic subzone
   
   print(adonis2(
-    formula = ASV.ait.t ~ Glacial.influence,
+    formula = ASV.ait.t ~ Bioclimatic_subzone,
     data = meta,
     method = "jaccard"
   ))
   
   
   dis <- vegdist(ASV.ait.t, method = "jaccard")
-  mod <- betadisper(dis, meta$Glacial.influence)
+  mod <- betadisper(dis, meta$Bioclimatic_subzone)
   
   print(mod)
   
@@ -107,18 +112,11 @@ RDA_plots <- function(meta, ASV.clr, ASV.ait){
   mod <- betadisper(dis, meta$Fjord)
   
   print(mod)
-  
-  #Sill
-  
-  print(adonis2(
-    formula = ASV.ait.t ~ Sill,
-    data = meta,
-    method = "jaccard"
-  ))
+
   
   #clean up!
-  detach("package:vegan", unload=TRUE)
-  detach("package:ggords", unload=TRUE)
+  #detach("package:vegan", unload=TRUE)
+  #detach("package:ggords", unload=TRUE)
   
 }
 
