@@ -25,8 +25,8 @@ alpha_div
 
 analysis_multivariate #this folder contains the RDA analysis 
 
-analysis_distance # this folder contains the correlation analysis between oceanographic connectivity and microbial beta diversity 
+analysis_distance # this folder contains the correlation analysis between oceanographic connectivity, temperature gradients and microbial beta diversity 
 
-analysis_network # this folder contains the network analysis of the pro-and eukaryotic networks between glacier and non-glacier influenced regions 
+analysis_network # this folder contains the trophic functional analysis of all bioclimatic subzones
 
 env_calc # this is the code for the plots of the environmental data
