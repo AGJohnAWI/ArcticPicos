@@ -18,14 +18,78 @@ require(ggplot2); packageVersion("ggplot2")
 require(vegan); packageVersion("vegan")
 require(tibble) #for "rownames_to_column('Site')" 
 require(reshape2); packageVersion("reshape2")
+library(dada2)
+packageVersion("dada2")
+library(ShortRead) #(for intallation with Biocmanager use the lib="~/R/x86_64-pc-linux-gnu-library/4.3" command)
+#packageVersion("ShortRead")
+library(Biostrings)
+#packageVersion("Biostrings")
+library(stringr)
 ```
+
+In qiime2
+
+#convert dada2 output to qiime biom object
+qiime tools import \
+--input-path ./ArcticPicos16S_rep-seqs.fna \
+--type 'FeatureData[Sequence]' \
+--output-path ./ArcticPicos_16S_rep-seqs.qza
+
+echo -n "#OTU Table" | cat - ./ArcticPicos_16S_seqtab-nochim.txt > ./dada2-analysis/biom-table.txt
+
+biom convert -i dada2-analysis/biom-table.txt -o dada2-analysis/table.biom --table-type="OTU table" --to-hdf5
+
+cd  dada2-analysis
+
+qiime tools import \
+  --input-path ./dada2-analysis/table.biom \
+  --type 'FeatureTable[Frequency]' \
+  --output-path ./dada2-analysis/table.qza
+
+qiime picrust2 full-pipeline \
+   --i-table ./dada2-analysis/table.qza \
+   --i-seq ArcticPicos_16S_rep-seqs.qza \
+   --output-dir q2-picrust2_output_mp \
+   --p-placement-tool epa-ng \
+   --p-threads 1 \
+   --p-hsp-method mp \
+   --p-max-nsti 2 \
+   --verbose
+   
+qiime feature-table summarize \
+   --i-table ./q2-picrust2_output/pathway_abundance.qza \
+   --o-visualization ./q2-picrust2_output/pathway_abundance.qzv
+
+
+#check output results with
+ qiime tools view ./q2-picrust2_output/pathway_abundance.qzv
+ 
+#min 735585
+
+qiime diversity core-metrics \
+   --i-table ./q2-picrust2_output/pathway_abundance.qza \
+   --p-sampling-depth 735585 \
+   --m-metadata-file meta_16S_functional.tsv \
+   --output-dir ./pathabun_core_metrics_out \
+   --p-n-jobs 1
+
+qiime tools export --input-path q2-picrust2_output/ec_metagenome.qza --output-path metaG_exported
+   
+biom convert \
+   -i pathabun_exported/feature-table.biom \
+   -o pathabun_exported/feature-table.biom.tsv \
+   --to-tsv
+
 
 ```{r import_data, echo=TRUE, warning=FALSE}
 source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/data_import/import.R", encoding = "UTF-8")
 
-source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/data_import/rename_metadata.R", encoding = "UTF-8")
+#source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/data_import/rename_metadata.R", #encoding = "UTF-8")
 
 ```
+
+16S: DOI
+10.5281/zenodo.4587955
 
 ### remove replicates and outliers
 
@@ -46,6 +110,7 @@ rep_18S <- c("HE533.Euk.F02.25B_S68", "HE533.Euk.F02.25C_S69", "HE533.Euk.F02.26
 
 rep_16S <- c("HE533.Prok.F02.25B_S90",  "HE533.Prok.F02.25C_S91", "HE533.Prok.F02.26B_S94", "HE533.Prok.F02.26C_S95", "HE533.Prok.F02.27B_S98", "HE533.Prok.F02.27C_S99", "HE533.Prok.F02.28B_S102", "HE533.Prok.F02.28C_S103", "HE533.Prok.F02.21B_S78",  "HE533.Prok.F02.21C_S79", "HE533.Prok.F02.22B_S82",  "HE533.Prok.F02.22C_S83", "HE533.Prok.F02.23B_S86", "HE533.Prok.F02.23C_S87", "HE533.Prok.F02.17B_S62", "HE533.Prok.F02.17C_S63", "HE533.Prok.F02.18B_S66",  "HE533.Prok.F02.18C_S67", "HE533.Prok.F02.19B_S70",  "HE533.Prok.F02.19C_S71", "HE533.Prok.F02.20B_S74", "HE533.Prok.F02.20C_S75", "HE533.Prok.F02.11B_S38",  "HE533.Prok.F02.11C_S39", "HE533.Prok.F02.12B_S42",  "HE533.Prok.F02.12C_S43", "HE533.Prok.F02.13B_S46", "HE533.Prok.F02.13C_S47", "HE533.Prok.F02.14B_S50", "HE533.Prok.F02.14C_S51", "HE533.Prok.F02.15B_S54",  "HE533.Prok.F02.15C_S55", "HE533.Prok.F02.16B_S58",  "HE533.Prok.F02.16C_S59", "HE533.Prok.F02.10B_S22",  "HE533.Prok.F02.7B_S34",  "HE533.Prok.F02.7C_S23", "HE533.Prok.F02.8B_S26",   "HE533.Prok.F02.8C_S27", "HE533.Prok.F02.2B_S2", "HE533.Prok.F02.2C_S3", "HE533.Prok.F02.3B_S6", "HE533.Prok.F02.3C_S7", "HE533.Prok.F02.4B_S10", "HE533.Prok.F02.4C_S11", "HE533.Prok.F02.5B_S14", "HE533.Prok.F02.5C_S15", "HE533.Prok.F02.6B_S18", "HE533.Prok.F02.6C_S19", "HE533.Prok.F02.9B_S30", "HE533.Prok.F02.9C_S31")
 
+
 ###remove outliers
 
 euk_r <- eukaryotes%>%dplyr::select(!outliers_euks)
@@ -58,8 +123,24 @@ prokaryotes = prok_r
 
 meta_18S_r <- meta_18S%>%dplyr::filter(Site %in% colnames(euk_r))
 meta_16S <- meta_16S%>%dplyr::filter(Site %in% colnames(prokaryotes))
+
+taxonomy_16S_r <- taxonomy_16S%>%filter(rownames %in% rownames(prok_r))
 rm(outliers_euks, rep_16S, rep_18S)
 ```
+
+prok_r$rownames <- rownames(prok_r)
+prokaryotes_F <- left_join(prok_r, taxonomy_16S[,c(9,7)], by = "rownames")
+rownames(prokaryotes_F) <- prokaryotes_F$sequence
+prokaryotes_F$sequence <- NULL
+prokaryotes_F$rownames <- NULL
+prokaryotes_F <- t(prokaryotes_F)
+#to use this in qiime (https://forum.qiime2.org/t/exporting-dada2-r-package-results-to-work-with-qiime2/2573/5)
+uniquesToFasta(prokaryotes_F, fout='/Users/corahoerstmann/Documents/AWI_ArcticFjords/Datasets/16S_functional/ArcticPicos16S_rep-seqs.fna', ids=colnames(prokaryotes_F))
+write.table(t(prokaryotes_F), "/Users/corahoerstmann/Documents/AWI_ArcticFjords/Datasets/ArcticPicos_16S_seqtab-nochim.txt", sep="\t", row.names=TRUE, col.names=NA, quote=FALSE)
+####
+
+write_tsv(meta_16S, "meta_16S_functional.tsv")
+
 import the distance tables of drifters
 
 ```{r drifter_model, echo=TRUE, warning=FALSE}
@@ -210,8 +291,6 @@ prok_ait_df <- as.data.frame(as.matrix(prok_aitchinson))
 ```{r RDA, echo=FALSE, warning=FALSE, fig.width=6,fig.height=4, out.width="50%"}
 source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_multivariate/RDA_plots.R")
 
-source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_multivariate/RDA_plots_v2.R")
-
 source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_multivariate/RDA_ordistep.R")
 
 
@@ -343,10 +422,15 @@ taxonomy_merged_clr[taxonomy_merged_clr==""]<-NA
 taxonomy_merged_clr$Tax_6[is.na(taxonomy_merged_clr$Tax_6)] <- "f__"
 taxonomy_merged_clr$Tax_5[is.na(taxonomy_merged_clr$Tax_5)] <- "g__"
 ```
+```{r}
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_network/BactoTrait_annotation.R")
+```
 
 
 ```{r trophic groups}
 source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_network/top_abundant.R")
 ```
 
-
+```{r trophic groups}
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_network/Picrust2_trait_comparison.R")
+```

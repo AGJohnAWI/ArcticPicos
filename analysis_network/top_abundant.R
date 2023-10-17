@@ -5,27 +5,38 @@
 
 ##Import the Trophic annotation
 Trophic_annotation <- read.csv("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Submission_CommBio/Arctic_fjords_taxonomy_annotated.csv", sep = ",")
+Trophic_annotation_auto <- Trophic_annotation%>%filter(str_detect(trophy, "auto"))%>%
+  cbind(trophy_simple = paste0("auto"))
+Trophic_annotation_het <- Trophic_annotation%>%filter(str_detect(trophy, "het"))%>%
+  cbind(trophy_simple = paste0("het"))
+Trophic_annotation_mixo <- Trophic_annotation%>%filter(str_detect(trophy, "mixo"))%>%
+  cbind(trophy_simple = paste0("mixo"))
+Trophic_annotation_unknown <- Trophic_annotation%>%filter(str_detect(trophy, "unknown"))%>%
+  cbind(trophy_simple = paste0("unknown"))
+Trophic_annotation <- rbind(Trophic_annotation_auto, Trophic_annotation_het, Trophic_annotation_mixo,
+                            Trophic_annotation_unknown)
 
+rm(Trophic_annotation_auto, Trophic_annotation_het, Trophic_annotation_mixo, Trophic_annotation_unknown)
 ##
 
 suppressPackageStartupMessages(require(phyloseq))
 packageVersion("phyloseq")
 require(metagMisc)
 packageVersion("metagMisc")
-require("NetCoMi")
-packageVersion("NetCoMi")
-require("igraph")
-packageVersion("igraph")
-require("qgraph")
-packageVersion("qgraph")
-require(limma)
+#require("NetCoMi")
+#packageVersion("NetCoMi")
+#require("igraph")
+#packageVersion("igraph")
+#require("qgraph")
+#packageVersion("qgraph")
+#require(limma)
 #install.packages("igraph")
 #install.packages("qgraph")
 ###create phyloseq
 
 
 #devtools::install_github("gmteunisse/fantaxtic")
-require("fantaxtic")
+require("fantaxtic"); packageVersion("fantaxtic")
 
 suppressPackageStartupMessages(require(phyloseq))
 packageVersion("phyloseq")
@@ -96,15 +107,16 @@ all_2
 
 all_3 <- psmelt(all_2)
 all_3$Tax_1 <- gsub(" ", "", all_3$Tax_1)
-all_3$function_Tax <- paste(all_3$Tax_1, all_3$trophy)
+all_3$function_Tax <- paste(all_3$Tax_1, all_3$trophy_simple)
 
-all_3$function_Tax2 <- factor(all_3$function_Tax, levels = c( "Bacteria auto", "Eukaryota auto", "Eukaryota mixo","Bacteria het","Archaea het","Eukaryota het", "Eukaryota unknown"))
+all_3$function_Tax2 <- factor(all_3$function_Tax, levels = c("Archaea auto","Bacteria auto", "Eukaryota auto","Bacteria mixo", "Eukaryota mixo","Bacteria het","Archaea het","Eukaryota het", "Archaea unknown", "Bacteria unknown","Eukaryota unknown"))
+all3_nNA <- all_3%>%filter(!Abundance == 0)
 ##
 
-d <- ggplot(all_3, aes(x = Sample, y = Abundance, color = function_Tax2))+
+d <- ggplot(all3_nNA, aes(x = Sample, y = Abundance, color = function_Tax2))+
   geom_bar(stat="identity", position="stack")+
-  scale_fill_manual(values= c("#60E27B","#99BC08", "#9324EA", "#A3610A", "#824B04","#3F2707", "grey"))+
-  scale_color_manual(values= c("#60E27B", "#99BC08","#9324EA", "#A3610A", "#824B04","#3F2707","grey"))+
+  scale_fill_manual(values= c("#4ca583","#60E27B","#99BC08","#db6adb", "#9324EA", "#A3610A", "#824B04","#eaeaea","#818281", "#4e4f4f"))+
+  scale_color_manual(values= c("#4ca583","#60E27B", "#99BC08","#db6adb","#9324EA", "#A3610A", "#824B04","#eaeaea","#818281", "#4e4f4f"))+
   theme(axis.text.x = element_text(size=4, vjust = 0.3, angle = 90))+
   facet_wrap(~Bioclimatic_subzone_B,
              scales = "free_x")
@@ -126,8 +138,8 @@ sTATS <- left_join(sTATS, meta_all[,c("Station", "Bioclimatic_subzone_B")], by="
 
 sTATS2 <- spread(sTATS, function_Tax, sum)
 
-ggplot(data = sTATS, mapping = aes(x = Bioclimatic_subzone_B, y = sum, color = function_Tax)) +
-  geom_boxplot()
+print(ggplot(data = sTATS, mapping = aes(x = Bioclimatic_subzone_B, y = sum, color = function_Tax)) +
+  geom_boxplot())
 
 
 #STATS
@@ -138,11 +150,21 @@ print(summary(aov(`Bacteria het` ~ Bioclimatic_subzone_B, data = sTATS2)))
 print(summary(aov(`Archaea het` ~ Bioclimatic_subzone_B, data = sTATS2)))
 print(summary(aov(`Bacteria auto` ~ Bioclimatic_subzone_B, data = sTATS2)))
 
+#No of annotated ASVs
+trophy_count <- as.tibble(Trophic_annotation)
+
+#trophy_count <- as.factor(trophy_count$trophy_simple)
+trophy_count%>%group_by(Tax_1)%>%dplyr::count(trophy_simple)
+#sum(Trophic_annotation$trophy_simple == "auto") 
+##t-test
+
 print(pairwise.t.test(sTATS2$`Bacteria auto`, sTATS2$Bioclimatic_subzone_B, var.equal = FALSE, p.adjust.method='bonferroni'))
+print(pairwise.t.test(sTATS2$`Archaea auto`, sTATS2$Bioclimatic_subzone_B, var.equal = FALSE, p.adjust.method='bonferroni'))
+print(pairwise.t.test(sTATS2$`Bacteria mixo`, sTATS2$Bioclimatic_subzone_B, var.equal = FALSE, p.adjust.method='bonferroni'))
 print(pairwise.t.test(sTATS2$`Eukaryota auto`, sTATS2$Bioclimatic_subzone_B, var.equal = FALSE, p.adjust.method='bonferroni'))
 print(pairwise.t.test(sTATS2$`Eukaryota mixo`, sTATS2$Bioclimatic_subzone_B, var.equal = FALSE, p.adjust.method='bonferroni'))
 print(pairwise.t.test(sTATS2$`Bacteria het`, sTATS2$Bioclimatic_subzone_B, var.equal = FALSE, p.adjust.method='bonferroni'))
-print(pairwise.t.test(sTATS2$`Archaea het`, sTATS2$Bioclimatic_subzone_B, var.equal = FALSE, p.adjust.method='bonferroni'))
+#print(pairwise.t.test(sTATS2$`Archaea het`, sTATS2$Bioclimatic_subzone_B, var.equal = FALSE, p.adjust.method='bonferroni'))
 print(pairwise.t.test(sTATS2$`Eukaryota het`, sTATS2$Bioclimatic_subzone_B, var.equal = FALSE, p.adjust.method='bonferroni'))
 
 
