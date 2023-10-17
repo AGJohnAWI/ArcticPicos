@@ -422,15 +422,16 @@ taxonomy_merged_clr[taxonomy_merged_clr==""]<-NA
 taxonomy_merged_clr$Tax_6[is.na(taxonomy_merged_clr$Tax_6)] <- "f__"
 taxonomy_merged_clr$Tax_5[is.na(taxonomy_merged_clr$Tax_5)] <- "g__"
 ```
-```{r}
-source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_network/BactoTrait_annotation.R")
-```
+
 
 
 ```{r trophic groups}
 source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_network/top_abundant.R")
 ```
+```{r BactoTrait, echo=FALSE, warning=FALSE}
+source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_network/BactoTrait_annotation.R")
+```
 
-```{r trophic groups}
+```{r PICRUST2 comparison, warning=FALSE}
 source("/Users/corahoerstmann/Documents/AWI_ArcticFjords/Code/analysis_network/Picrust2_trait_comparison.R")
 ```

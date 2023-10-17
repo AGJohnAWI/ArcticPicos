@@ -21,7 +21,7 @@ KO_C_energy_t$sum_C_KOs <- rowSums(KO_C_energy_t)
 KO_C_energy_t$Site <- rownames(KO_C_energy_t)
 
 
-Tax_traits <- as.data.frame(tax.matrix)
+Tax_traits <- as.data.frame(Trophic_annotation)
 Tax_traits_Bac <- Tax_traits%>%filter(Tax_1 == " Bacteria")
 Tax_traits_Bac_auto <- Tax_traits_Bac%>%filter(trophy_simple == "auto")
 Abundance_traits_all <- as.data.frame(merged_clr_all_norm_P_a)
